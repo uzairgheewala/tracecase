@@ -1,0 +1,4 @@
+{"attributes":{},"group_id":"identity-group.0b2159e63c5f56a1","identity_value":"tenant-alpha","kind":"tenant","member_node_refs":["node.synthetic.role.consume","node.synthetic.role.publish","node.synthetic.role.request","node.synthetic.role.write"]}
+{"attributes":{},"group_id":"identity-group.c358cc43041cd41d","identity_value":"workflow-9cd4e0ab4d8e","kind":"workflow","member_node_refs":["node.synthetic.role.consume","node.synthetic.role.publish","node.synthetic.role.request","node.synthetic.role.write"]}
+{"attributes":{},"group_id":"identity-group.d171fb09e11da1ea","identity_value":"e2ae887558110db0658be93ef4b98866","kind":"trace","member_node_refs":["node.synthetic.role.publish","node.synthetic.role.request","node.synthetic.role.write"]}
+{"attributes":{},"group_id":"identity-group.e51d3b707e8d01e3","identity_value":"message-workflow-9cd4e0ab4d8e","kind":"message","member_node_refs":["node.synthetic.role.consume","node.synthetic.role.publish"]}

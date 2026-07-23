@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-import json
 import shutil
 import tempfile
 import zipfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Iterable
 
 from tracecase_model import ExecutionCase, build_core_schema_catalog
@@ -17,11 +16,13 @@ from .models import (
     BundleLifecycle,
     BundleManifest,
     BundleProfile,
+    CollectionDescriptor,
     ContentEntry,
     ContentIndex,
     IntegrityDescriptor,
     PrivacyDescriptor,
     ProducerDescriptor,
+    ScenarioDescriptor,
 )
 
 
@@ -32,17 +33,69 @@ class BuildResult:
     content_index: ContentIndex
 
 
+@dataclass(frozen=True)
+class SupplementalArtifact:
+    """Opaque, schema-versioned artifact written without coupling bundle code to producers."""
+
+    path: str
+    value: object
+    media_type: str = "application/json"
+    json_lines: bool = False
+    required: bool = True
+
+
 class BundleBuilder:
     """Build a deterministic directory-form Tracecase bundle."""
 
-    PAYLOAD_ROOTS = ("specification", "provenance", "evidence", "model", "analysis", "comparison", "policy", "reports", "schemas")
+    PAYLOAD_ROOTS = (
+        "specification",
+        "provenance",
+        "evidence",
+        "model",
+        "analysis",
+        "comparison",
+        "policy",
+        "reports",
+        "schemas",
+        "synthetic",
+        "collection",
+        "registry",
+    )
+    RESERVED_PATHS = {
+        "manifest.json",
+        "specification/case.json",
+        "specification/system_snapshot.json",
+        "provenance/sources.json",
+        "evidence/observations.jsonl",
+        "evidence/state_facts.jsonl",
+        "evidence/effects.jsonl",
+        "model/nodes.jsonl",
+        "model/relations.jsonl",
+        "model/contexts.jsonl",
+        "model/execution.json",
+        "analysis/interpretations.json",
+        "schemas/schema_catalog.json",
+        "integrity/content_index.json",
+        "integrity/checksums.json",
+        "integrity/validation_report.json",
+    }
 
     def __init__(self, output_path: Path, *, producer: ProducerDescriptor | None = None) -> None:
         self.output_path = output_path
-        self.producer = producer or ProducerDescriptor(name="tracecase", version="0.1.0")
+        self.producer = producer or ProducerDescriptor(name="tracecase", version="0.2.0")
         self._frozen = False
 
-    def build(self, case: ExecutionCase, *, overwrite: bool = False) -> BuildResult:
+    def build(
+        self,
+        case: ExecutionCase,
+        *,
+        overwrite: bool = False,
+        supplements: Iterable[SupplementalArtifact] = (),
+        profiles: tuple[BundleProfile, ...] | None = None,
+        scenario: ScenarioDescriptor | None = None,
+        collection: CollectionDescriptor | None = None,
+        analysis_status: str = "not_started",
+    ) -> BuildResult:
         if self._frozen:
             raise RuntimeError("builder has already frozen a bundle")
         if self.output_path.exists():
@@ -56,7 +109,9 @@ class BundleBuilder:
 
         self._write_case(case)
         self._write_schema_catalog()
-        self._write_placeholder_reports()
+        self._write_placeholder_reports(analysis_status)
+        for supplement in supplements:
+            self._write_supplement(supplement)
 
         content_index = self._build_content_index()
         self._write_json("integrity/content_index.json", content_index)
@@ -66,7 +121,9 @@ class BundleBuilder:
         )
 
         evidence_entries = [
-            entry for entry in content_index.entries if entry.layer in {"specification", "provenance", "evidence", "model"}
+            entry
+            for entry in content_index.entries
+            if entry.layer in {"specification", "provenance", "evidence", "model", "synthetic", "collection"}
         ]
         evidence_digest = self._digest_index(evidence_entries)
         bundle_digest = self._digest_index(list(content_index.entries))
@@ -75,7 +132,7 @@ class BundleBuilder:
             bundle_id=f"bundle.{case.specification.case_id}",
             case_id=case.specification.case_id,
             case_category=case.specification.category.value,
-            profiles=(BundleProfile.EVIDENCE, BundleProfile.REPRODUCIBLE),
+            profiles=profiles or (BundleProfile.EVIDENCE, BundleProfile.REPRODUCIBLE),
             lifecycle=BundleLifecycle.FROZEN,
             created_at=case.specification.created_at,
             frozen_at=now,
@@ -83,7 +140,12 @@ class BundleBuilder:
             roots=case.specification.roots,
             baselines=case.specification.baseline_case_refs,
             privacy=PrivacyDescriptor(classification="internal"),
-            analysis=AnalysisDescriptor(status="not_started"),
+            analysis=AnalysisDescriptor(
+                status=analysis_status,
+                analysis_runs_ref=("analysis/graph_assembly_report.json" if analysis_status != "not_started" else None),
+            ),
+            scenario=scenario,
+            collection=collection or CollectionDescriptor(),
             integrity=IntegrityDescriptor(
                 evidence_digest=evidence_digest,
                 bundle_digest=bundle_digest,
@@ -136,14 +198,34 @@ class BundleBuilder:
     def _write_schema_catalog(self) -> None:
         self._write_json("schemas/schema_catalog.json", build_core_schema_catalog())
 
-    def _write_placeholder_reports(self) -> None:
+    def _write_placeholder_reports(self, analysis_status: str) -> None:
         self._write_json(
             "reports/machine_summary.json",
             {
-                "status": "not_analyzed",
-                "message": "Milestone A bundle contains canonical evidence but no analyzer outputs.",
+                "status": analysis_status,
+                "message": (
+                    "Canonical evidence and derived execution graph are available."
+                    if analysis_status != "not_started"
+                    else "Bundle contains canonical evidence but no analyzer outputs."
+                ),
             },
         )
+
+    def _write_supplement(self, supplement: SupplementalArtifact) -> None:
+        path = PurePosixPath(supplement.path)
+        if path.is_absolute() or ".." in path.parts or len(path.parts) < 2:
+            raise ValueError(f"unsafe supplemental path: {supplement.path}")
+        if path.parts[0] not in self.PAYLOAD_ROOTS:
+            raise ValueError(f"unsupported supplemental layer: {path.parts[0]}")
+        normalized = path.as_posix()
+        if normalized in self.RESERVED_PATHS:
+            raise ValueError(f"supplement cannot overwrite reserved path: {normalized}")
+        if supplement.json_lines:
+            if not isinstance(supplement.value, Iterable) or isinstance(supplement.value, (str, bytes, dict)):
+                raise TypeError("JSONL supplement value must be a non-string iterable")
+            self._write_jsonl(normalized, supplement.value)
+        else:
+            self._write_json(normalized, supplement.value)
 
     def _write_json(self, relative_path: str, value: object) -> None:
         path = self.output_path / relative_path

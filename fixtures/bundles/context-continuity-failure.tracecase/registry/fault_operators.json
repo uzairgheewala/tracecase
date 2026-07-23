@@ -1,0 +1,1 @@
+[{"attributes":{},"description":"Drop required context","kind":"drop_context_field","operator_class":"semantic","operator_id":"fault.drop-context.v1","parameter_domains":[],"target_kinds":["context","role"],"title":"Drop required context","universe_axes":["boundary_propagation"]}]

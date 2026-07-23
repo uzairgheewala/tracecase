@@ -1,0 +1,407 @@
+[
+  {
+    "attributes": {},
+    "contexts": [
+      {
+        "attributes": {},
+        "contract_id": "contract.tenant-context",
+        "field_name": "tenant_id",
+        "namespace": "tenant",
+        "propagation_contract": "required",
+        "required_role_refs": [
+          "role.consume"
+        ],
+        "sensitivity": [
+          "tenant_identifier"
+        ],
+        "source_role_ref": "role.request",
+        "value": "tenant-alpha"
+      },
+      {
+        "attributes": {},
+        "contract_id": "contract.workflow-context",
+        "field_name": "run_id",
+        "namespace": "workflow",
+        "propagation_contract": "required",
+        "required_role_refs": [
+          "role.publish",
+          "role.consume"
+        ],
+        "sensitivity": [
+          "internal"
+        ],
+        "source_role_ref": "role.request",
+        "value": "workflow-synthetic-001"
+      }
+    ],
+    "edges": [
+      {
+        "attributes": {},
+        "boundary_kind": "message_publish",
+        "boundary_name": "asynchronous publish",
+        "derivation": "explicit",
+        "edge_id": "edge.request-publish",
+        "extensions": {},
+        "relation_kind": "publishes",
+        "source_role_ref": "role.request",
+        "target_role_ref": "role.publish"
+      },
+      {
+        "attributes": {},
+        "boundary_kind": "message_consume",
+        "boundary_name": "message delivery",
+        "derivation": "source_native",
+        "edge_id": "edge.publish-consume",
+        "extensions": {},
+        "relation_kind": "delivers",
+        "source_role_ref": "role.publish",
+        "target_role_ref": "role.consume"
+      },
+      {
+        "attributes": {},
+        "boundary_kind": "database",
+        "boundary_name": "durable write",
+        "derivation": "explicit",
+        "edge_id": "edge.consume-write",
+        "extensions": {},
+        "relation_kind": "writes_to",
+        "source_role_ref": "role.consume",
+        "target_role_ref": "role.write"
+      }
+    ],
+    "effects": [
+      {
+        "attributes": {},
+        "contract_id": "contract.workflow-effect",
+        "effect_kind": "state_update",
+        "idempotency_key": "workflow-synthetic-001-complete",
+        "logical_effect_key": "workflow/synthetic-001/completed",
+        "maximum_durable_count": 1,
+        "operation": "mark workflow complete",
+        "producer_role_ref": "role.consume",
+        "required": true,
+        "target_resource_ref": "resource.workflow-state"
+      }
+    ],
+    "motif": "async_handoff",
+    "resources": [
+      {
+        "attributes": {},
+        "kind": "logical_aggregate",
+        "name": "Workflow state",
+        "owner_role_ref": "role.write",
+        "resource_id": "resource.workflow-state",
+        "sensitivity": [
+          "tenant_identifier"
+        ]
+      }
+    ],
+    "roles": [
+      {
+        "attributes": {},
+        "component_kind": "api",
+        "component_role": "producer",
+        "default_status": "ok",
+        "extensions": {},
+        "node_kind": "request_handler",
+        "operation": "workflow.accept",
+        "role_id": "role.request",
+        "stage": 0
+      },
+      {
+        "attributes": {},
+        "component_kind": "api",
+        "component_role": "producer",
+        "default_status": "ok",
+        "extensions": {},
+        "node_kind": "message_publish",
+        "operation": "workflow.publish",
+        "role_id": "role.publish",
+        "stage": 1
+      },
+      {
+        "attributes": {},
+        "component_kind": "worker",
+        "component_role": "consumer",
+        "default_status": "ok",
+        "extensions": {},
+        "node_kind": "task_attempt",
+        "operation": "workflow.consume",
+        "role_id": "role.consume",
+        "stage": 2
+      },
+      {
+        "attributes": {},
+        "component_kind": "database",
+        "component_role": "state-store",
+        "default_status": "committed",
+        "extensions": {},
+        "node_kind": "write",
+        "operation": "workflow.persist",
+        "role_id": "role.write",
+        "stage": 3
+      }
+    ],
+    "topology_id": "topology.async-effect.v1"
+  },
+  {
+    "attributes": {},
+    "contexts": [
+      {
+        "attributes": {},
+        "contract_id": "contract.transaction-workflow",
+        "field_name": "run_id",
+        "namespace": "workflow",
+        "propagation_contract": "required",
+        "required_role_refs": [
+          "role.tx-consume"
+        ],
+        "sensitivity": [],
+        "source_role_ref": "role.tx-request",
+        "value": "workflow-transaction-001"
+      }
+    ],
+    "edges": [
+      {
+        "attributes": {},
+        "boundary_kind": "transaction",
+        "boundary_name": null,
+        "derivation": "explicit",
+        "edge_id": "edge.request-transaction",
+        "extensions": {},
+        "relation_kind": "contains",
+        "source_role_ref": "role.tx-request",
+        "target_role_ref": "role.transaction"
+      },
+      {
+        "attributes": {},
+        "boundary_kind": "message_publish",
+        "boundary_name": null,
+        "derivation": "explicit",
+        "edge_id": "edge.request-tx-publish",
+        "extensions": {},
+        "relation_kind": "publishes",
+        "source_role_ref": "role.tx-request",
+        "target_role_ref": "role.tx-publish"
+      },
+      {
+        "attributes": {},
+        "boundary_kind": "message_consume",
+        "boundary_name": null,
+        "derivation": "explicit",
+        "edge_id": "edge.tx-publish-consume",
+        "extensions": {},
+        "relation_kind": "delivers",
+        "source_role_ref": "role.tx-publish",
+        "target_role_ref": "role.tx-consume"
+      },
+      {
+        "attributes": {},
+        "boundary_kind": "database",
+        "boundary_name": null,
+        "derivation": "explicit",
+        "edge_id": "edge.consume-read",
+        "extensions": {},
+        "relation_kind": "reads_from",
+        "source_role_ref": "role.tx-consume",
+        "target_role_ref": "role.read"
+      }
+    ],
+    "effects": [],
+    "motif": "transactional_async",
+    "resources": [
+      {
+        "attributes": {},
+        "kind": "database_row",
+        "name": "Transactional state",
+        "owner_role_ref": "role.transaction",
+        "resource_id": "resource.transactional-state",
+        "sensitivity": []
+      }
+    ],
+    "roles": [
+      {
+        "attributes": {},
+        "component_kind": "api",
+        "component_role": "producer",
+        "default_status": "ok",
+        "extensions": {},
+        "node_kind": "request_handler",
+        "operation": "state.create-request",
+        "role_id": "role.tx-request",
+        "stage": 0
+      },
+      {
+        "attributes": {},
+        "component_kind": "database",
+        "component_role": "state-store",
+        "default_status": "committed",
+        "extensions": {},
+        "node_kind": "transaction",
+        "operation": "state.transaction",
+        "role_id": "role.transaction",
+        "stage": 1
+      },
+      {
+        "attributes": {},
+        "component_kind": "api",
+        "component_role": "producer",
+        "default_status": "ok",
+        "extensions": {},
+        "node_kind": "message_publish",
+        "operation": "state.publish",
+        "role_id": "role.tx-publish",
+        "stage": 2
+      },
+      {
+        "attributes": {},
+        "component_kind": "worker",
+        "component_role": "consumer",
+        "default_status": "ok",
+        "extensions": {},
+        "node_kind": "task_attempt",
+        "operation": "state.consume",
+        "role_id": "role.tx-consume",
+        "stage": 3
+      },
+      {
+        "attributes": {},
+        "component_kind": "database",
+        "component_role": "state-store",
+        "default_status": "ok",
+        "extensions": {},
+        "node_kind": "read",
+        "operation": "state.read",
+        "role_id": "role.read",
+        "stage": 4
+      }
+    ],
+    "topology_id": "topology.transactional-async.v1"
+  },
+  {
+    "attributes": {},
+    "contexts": [
+      {
+        "attributes": {},
+        "contract_id": "contract.request-context",
+        "field_name": "request_id",
+        "namespace": "request",
+        "propagation_contract": "required",
+        "required_role_refs": [
+          "role.service"
+        ],
+        "sensitivity": [],
+        "source_role_ref": "role.client",
+        "value": "request-synthetic-001"
+      }
+    ],
+    "edges": [
+      {
+        "attributes": {},
+        "boundary_kind": "http",
+        "boundary_name": null,
+        "derivation": "explicit",
+        "edge_id": "edge.client-service",
+        "extensions": {},
+        "relation_kind": "invokes",
+        "source_role_ref": "role.client",
+        "target_role_ref": "role.service"
+      },
+      {
+        "attributes": {},
+        "boundary_kind": "external_dependency",
+        "boundary_name": null,
+        "derivation": "explicit",
+        "edge_id": "edge.service-dependency",
+        "extensions": {},
+        "relation_kind": "invokes",
+        "source_role_ref": "role.service",
+        "target_role_ref": "role.dependency"
+      }
+    ],
+    "effects": [],
+    "motif": "synchronous_chain",
+    "resources": [],
+    "roles": [
+      {
+        "attributes": {},
+        "component_kind": "client",
+        "component_role": null,
+        "default_status": "ok",
+        "extensions": {},
+        "node_kind": "client_request",
+        "operation": "client.invoke",
+        "role_id": "role.client",
+        "stage": 0
+      },
+      {
+        "attributes": {},
+        "component_kind": "service",
+        "component_role": null,
+        "default_status": "ok",
+        "extensions": {},
+        "node_kind": "service_operation",
+        "operation": "service.handle",
+        "role_id": "role.service",
+        "stage": 1
+      },
+      {
+        "attributes": {},
+        "component_kind": "external_service",
+        "component_role": null,
+        "default_status": "ok",
+        "extensions": {},
+        "node_kind": "external_request",
+        "operation": "dependency.call",
+        "role_id": "role.dependency",
+        "stage": 2
+      }
+    ],
+    "topology_id": "topology.sync-chain.v1"
+  },
+  {
+    "attributes": {},
+    "contexts": [],
+    "edges": [
+      {
+        "attributes": {},
+        "boundary_kind": "message_publish",
+        "boundary_name": null,
+        "derivation": "explicit",
+        "edge_id": "edge.fan-root-child",
+        "extensions": {},
+        "relation_kind": "spawns",
+        "source_role_ref": "role.fan-root",
+        "target_role_ref": "role.fan-child"
+      }
+    ],
+    "effects": [],
+    "motif": "fan_out",
+    "resources": [],
+    "roles": [
+      {
+        "attributes": {},
+        "component_kind": "service",
+        "component_role": null,
+        "default_status": "ok",
+        "extensions": {},
+        "node_kind": "service_operation",
+        "operation": "fanout.root",
+        "role_id": "role.fan-root",
+        "stage": 0
+      },
+      {
+        "attributes": {},
+        "component_kind": "worker",
+        "component_role": null,
+        "default_status": "ok",
+        "extensions": {},
+        "node_kind": "task_attempt",
+        "operation": "fanout.child",
+        "role_id": "role.fan-child",
+        "stage": 1
+      }
+    ],
+    "topology_id": "topology.fan-out.v1"
+  }
+]

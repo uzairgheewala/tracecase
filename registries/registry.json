@@ -1,0 +1,1402 @@
+{
+  "attributes": {
+    "coverage_model": "orthogonal semantic universes",
+    "family_count": 14
+  },
+  "families": [
+    {
+      "admissibility_constraints": [],
+      "allowed_fault_operator_refs": [
+        "fault.drop-context.v1"
+      ],
+      "attributes": {},
+      "description": "Required context disappears",
+      "extensions": {},
+      "family_class": "continuity",
+      "family_id": "family.continuity.context-disappearance.v1",
+      "family_version": "1.0.0",
+      "invariant_refs": [
+        "invariant.context.required-continuity.v1"
+      ],
+      "minimization": {
+        "dimensions": [
+          "unrelated_roles",
+          "retries",
+          "context_fields",
+          "observations",
+          "fault_schedule"
+        ],
+        "preserve_context_refs": [],
+        "preserve_effect_refs": [],
+        "preserve_role_refs": []
+      },
+      "observability_profiles": [
+        "complete"
+      ],
+      "parameter_domains": [
+        {
+          "default": "message",
+          "kind": "enum",
+          "parameter": "boundary_variant",
+          "values": [
+            "message",
+            "task",
+            "http-callback"
+          ]
+        },
+        {
+          "default": "tenant.tenant_id",
+          "kind": "enum",
+          "parameter": "context_field",
+          "values": [
+            "tenant.tenant_id",
+            "workflow.run_id"
+          ]
+        }
+      ],
+      "parent_family_ref": null,
+      "tags": [],
+      "title": "Required context disappears",
+      "topology_ref": "topology.async-effect.v1",
+      "universe_axes": [
+        "boundary_propagation",
+        "observability_evidence"
+      ]
+    },
+    {
+      "admissibility_constraints": [],
+      "allowed_fault_operator_refs": [
+        "fault.mutate-context.v1"
+      ],
+      "attributes": {},
+      "description": "Required context mutates",
+      "extensions": {},
+      "family_class": "continuity",
+      "family_id": "family.continuity.context-mutation.v1",
+      "family_version": "1.0.0",
+      "invariant_refs": [
+        "invariant.context.required-continuity.v1"
+      ],
+      "minimization": {
+        "dimensions": [
+          "unrelated_roles",
+          "retries",
+          "context_fields",
+          "observations",
+          "fault_schedule"
+        ],
+        "preserve_context_refs": [],
+        "preserve_effect_refs": [],
+        "preserve_role_refs": []
+      },
+      "observability_profiles": [
+        "complete"
+      ],
+      "parameter_domains": [
+        {
+          "default": "message",
+          "kind": "enum",
+          "parameter": "boundary_variant",
+          "values": [
+            "message",
+            "task",
+            "http-callback"
+          ]
+        },
+        {
+          "default": "tenant.tenant_id",
+          "kind": "enum",
+          "parameter": "context_field",
+          "values": [
+            "tenant.tenant_id",
+            "workflow.run_id"
+          ]
+        }
+      ],
+      "parent_family_ref": null,
+      "tags": [],
+      "title": "Required context mutates",
+      "topology_ref": "topology.async-effect.v1",
+      "universe_axes": [
+        "boundary_propagation"
+      ]
+    },
+    {
+      "admissibility_constraints": [],
+      "allowed_fault_operator_refs": [
+        "fault.copy-other-scope-context.v1"
+      ],
+      "attributes": {},
+      "description": "Context crosses isolation scopes",
+      "extensions": {},
+      "family_class": "isolation",
+      "family_id": "family.isolation.context-contamination.v1",
+      "family_version": "1.0.0",
+      "invariant_refs": [
+        "invariant.identity.execution-isolation.v1"
+      ],
+      "minimization": {
+        "dimensions": [
+          "unrelated_roles",
+          "retries",
+          "context_fields",
+          "observations",
+          "fault_schedule"
+        ],
+        "preserve_context_refs": [],
+        "preserve_effect_refs": [],
+        "preserve_role_refs": []
+      },
+      "observability_profiles": [
+        "complete"
+      ],
+      "parameter_domains": [
+        {
+          "default": true,
+          "kind": "boolean",
+          "parameter": "concurrent"
+        }
+      ],
+      "parent_family_ref": null,
+      "tags": [],
+      "title": "Context crosses isolation scopes",
+      "topology_ref": "topology.async-effect.v1",
+      "universe_axes": [
+        "isolation_privacy",
+        "time_concurrency"
+      ]
+    },
+    {
+      "admissibility_constraints": [],
+      "allowed_fault_operator_refs": [
+        "fault.break-trace-link.v1"
+      ],
+      "attributes": {},
+      "description": "One workflow fragments into disconnected identities",
+      "extensions": {},
+      "family_class": "identity",
+      "family_id": "family.identity.execution-fragmentation.v1",
+      "family_version": "1.0.0",
+      "invariant_refs": [
+        "invariant.identity.workflow-correlatable.v1",
+        "invariant.observability.required-linkage.v1"
+      ],
+      "minimization": {
+        "dimensions": [
+          "unrelated_roles",
+          "retries",
+          "context_fields",
+          "observations",
+          "fault_schedule"
+        ],
+        "preserve_context_refs": [],
+        "preserve_effect_refs": [],
+        "preserve_role_refs": []
+      },
+      "observability_profiles": [
+        "complete"
+      ],
+      "parameter_domains": [],
+      "parent_family_ref": null,
+      "tags": [],
+      "title": "One workflow fragments into disconnected identities",
+      "topology_ref": "topology.async-effect.v1",
+      "universe_axes": [
+        "observability_evidence",
+        "boundary_propagation"
+      ]
+    },
+    {
+      "admissibility_constraints": [],
+      "allowed_fault_operator_refs": [
+        "fault.collapse-execution-identity.v1"
+      ],
+      "attributes": {},
+      "description": "Independent executions collapse onto one identity",
+      "extensions": {},
+      "family_class": "identity",
+      "family_id": "family.identity.execution-collapse.v1",
+      "family_version": "1.0.0",
+      "invariant_refs": [
+        "invariant.identity.execution-isolation.v1"
+      ],
+      "minimization": {
+        "dimensions": [
+          "unrelated_roles",
+          "retries",
+          "context_fields",
+          "observations",
+          "fault_schedule"
+        ],
+        "preserve_context_refs": [],
+        "preserve_effect_refs": [],
+        "preserve_role_refs": []
+      },
+      "observability_profiles": [
+        "complete"
+      ],
+      "parameter_domains": [],
+      "parent_family_ref": null,
+      "tags": [],
+      "title": "Independent executions collapse onto one identity",
+      "topology_ref": "topology.async-effect.v1",
+      "universe_axes": [
+        "isolation_privacy",
+        "observability_evidence"
+      ]
+    },
+    {
+      "admissibility_constraints": [],
+      "allowed_fault_operator_refs": [
+        "fault.duplicate-effect.v1",
+        "fault.fail-after-effect.v1"
+      ],
+      "attributes": {},
+      "description": "Logical effect becomes durable more than once",
+      "extensions": {},
+      "family_class": "effect",
+      "family_id": "family.effect.duplicate.v1",
+      "family_version": "1.0.0",
+      "invariant_refs": [
+        "invariant.effect.at-most-once.v1"
+      ],
+      "minimization": {
+        "dimensions": [
+          "unrelated_roles",
+          "retries",
+          "context_fields",
+          "observations",
+          "fault_schedule"
+        ],
+        "preserve_context_refs": [],
+        "preserve_effect_refs": [],
+        "preserve_role_refs": []
+      },
+      "observability_profiles": [
+        "complete"
+      ],
+      "parameter_domains": [
+        {
+          "default": 2,
+          "kind": "integer_range",
+          "maximum": 4,
+          "minimum": 2,
+          "parameter": "attempts",
+          "step": 1
+        }
+      ],
+      "parent_family_ref": null,
+      "tags": [],
+      "title": "Logical effect becomes durable more than once",
+      "topology_ref": "topology.async-effect.v1",
+      "universe_axes": [
+        "state_effects",
+        "failure_recovery"
+      ]
+    },
+    {
+      "admissibility_constraints": [],
+      "allowed_fault_operator_refs": [
+        "fault.omit-effect.v1"
+      ],
+      "attributes": {},
+      "description": "Required effect never occurs",
+      "extensions": {},
+      "family_class": "effect",
+      "family_id": "family.effect.omission.v1",
+      "family_version": "1.0.0",
+      "invariant_refs": [
+        "invariant.effect.required-eventuality.v1"
+      ],
+      "minimization": {
+        "dimensions": [
+          "unrelated_roles",
+          "retries",
+          "context_fields",
+          "observations",
+          "fault_schedule"
+        ],
+        "preserve_context_refs": [],
+        "preserve_effect_refs": [],
+        "preserve_role_refs": []
+      },
+      "observability_profiles": [
+        "complete"
+      ],
+      "parameter_domains": [],
+      "parent_family_ref": null,
+      "tags": [],
+      "title": "Required effect never occurs",
+      "topology_ref": "topology.async-effect.v1",
+      "universe_axes": [
+        "state_effects",
+        "failure_recovery"
+      ]
+    },
+    {
+      "admissibility_constraints": [],
+      "allowed_fault_operator_refs": [
+        "fault.reorder-operations.v1",
+        "fault.delay-operation.v1"
+      ],
+      "attributes": {},
+      "description": "Consumer reads before producer state is visible",
+      "extensions": {},
+      "family_class": "ordering",
+      "family_id": "family.ordering.read-before-visibility.v1",
+      "family_version": "1.0.0",
+      "invariant_refs": [
+        "invariant.ordering.read-after-visibility.v1"
+      ],
+      "minimization": {
+        "dimensions": [
+          "unrelated_roles",
+          "retries",
+          "context_fields",
+          "observations",
+          "fault_schedule"
+        ],
+        "preserve_context_refs": [],
+        "preserve_effect_refs": [],
+        "preserve_role_refs": []
+      },
+      "observability_profiles": [
+        "complete"
+      ],
+      "parameter_domains": [],
+      "parent_family_ref": null,
+      "tags": [],
+      "title": "Consumer reads before producer state is visible",
+      "topology_ref": "topology.transactional-async.v1",
+      "universe_axes": [
+        "time_concurrency",
+        "state_effects"
+      ]
+    },
+    {
+      "admissibility_constraints": [],
+      "allowed_fault_operator_refs": [
+        "fault.delay-operation.v1"
+      ],
+      "attributes": {},
+      "description": "Consumer observes stale state",
+      "extensions": {},
+      "family_class": "consistency",
+      "family_id": "family.consistency.stale-observation.v1",
+      "family_version": "1.0.0",
+      "invariant_refs": [
+        "invariant.consistency.required-freshness.v1"
+      ],
+      "minimization": {
+        "dimensions": [
+          "unrelated_roles",
+          "retries",
+          "context_fields",
+          "observations",
+          "fault_schedule"
+        ],
+        "preserve_context_refs": [],
+        "preserve_effect_refs": [],
+        "preserve_role_refs": []
+      },
+      "observability_profiles": [
+        "complete"
+      ],
+      "parameter_domains": [],
+      "parent_family_ref": null,
+      "tags": [],
+      "title": "Consumer observes stale state",
+      "topology_ref": "topology.transactional-async.v1",
+      "universe_axes": [
+        "state_effects",
+        "time_concurrency"
+      ]
+    },
+    {
+      "admissibility_constraints": [],
+      "allowed_fault_operator_refs": [
+        "fault.schema-version-skew.v1"
+      ],
+      "attributes": {},
+      "description": "Producer and consumer schemas are incompatible",
+      "extensions": {},
+      "family_class": "contract",
+      "family_id": "family.contract.schema-incompatibility.v1",
+      "family_version": "1.0.0",
+      "invariant_refs": [
+        "invariant.contract.schema-compatible.v1"
+      ],
+      "minimization": {
+        "dimensions": [
+          "unrelated_roles",
+          "retries",
+          "context_fields",
+          "observations",
+          "fault_schedule"
+        ],
+        "preserve_context_refs": [],
+        "preserve_effect_refs": [],
+        "preserve_role_refs": []
+      },
+      "observability_profiles": [
+        "complete"
+      ],
+      "parameter_domains": [
+        {
+          "default": "2.0",
+          "kind": "enum",
+          "parameter": "producer_version",
+          "values": [
+            "1.0",
+            "2.0"
+          ]
+        },
+        {
+          "default": "1.0",
+          "kind": "enum",
+          "parameter": "consumer_version",
+          "values": [
+            "1.0",
+            "2.0"
+          ]
+        }
+      ],
+      "parent_family_ref": null,
+      "tags": [],
+      "title": "Producer and consumer schemas are incompatible",
+      "topology_ref": "topology.async-effect.v1",
+      "universe_axes": [
+        "contract_evolution",
+        "deployment_configuration"
+      ]
+    },
+    {
+      "admissibility_constraints": [],
+      "allowed_fault_operator_refs": [
+        "fault.exhaust-resource.v1"
+      ],
+      "attributes": {},
+      "description": "Required resource capacity is exhausted",
+      "extensions": {},
+      "family_class": "resource",
+      "family_id": "family.resource.capacity-exhaustion.v1",
+      "family_version": "1.0.0",
+      "invariant_refs": [
+        "invariant.resource.capacity-bounded.v1"
+      ],
+      "minimization": {
+        "dimensions": [
+          "unrelated_roles",
+          "retries",
+          "context_fields",
+          "observations",
+          "fault_schedule"
+        ],
+        "preserve_context_refs": [],
+        "preserve_effect_refs": [],
+        "preserve_role_refs": []
+      },
+      "observability_profiles": [
+        "complete"
+      ],
+      "parameter_domains": [
+        {
+          "default": 2,
+          "kind": "integer_range",
+          "maximum": 10,
+          "minimum": 1,
+          "parameter": "capacity",
+          "step": 1
+        }
+      ],
+      "parent_family_ref": null,
+      "tags": [],
+      "title": "Required resource capacity is exhausted",
+      "topology_ref": "topology.sync-chain.v1",
+      "universe_axes": [
+        "resources_performance"
+      ]
+    },
+    {
+      "admissibility_constraints": [],
+      "allowed_fault_operator_refs": [
+        "fault.amplify-operation.v1"
+      ],
+      "attributes": {},
+      "description": "Logical work amplifies beyond its bound",
+      "extensions": {},
+      "family_class": "performance",
+      "family_id": "family.performance.execution-amplification.v1",
+      "family_version": "1.0.0",
+      "invariant_refs": [
+        "invariant.performance.work-amplification.v1"
+      ],
+      "minimization": {
+        "dimensions": [
+          "unrelated_roles",
+          "retries",
+          "context_fields",
+          "observations",
+          "fault_schedule"
+        ],
+        "preserve_context_refs": [],
+        "preserve_effect_refs": [],
+        "preserve_role_refs": []
+      },
+      "observability_profiles": [
+        "complete"
+      ],
+      "parameter_domains": [
+        {
+          "default": 2,
+          "kind": "integer_range",
+          "maximum": 5,
+          "minimum": 1,
+          "parameter": "expected_fanout",
+          "step": 1
+        }
+      ],
+      "parent_family_ref": null,
+      "tags": [],
+      "title": "Logical work amplifies beyond its bound",
+      "topology_ref": "topology.fan-out.v1",
+      "universe_axes": [
+        "resources_performance",
+        "execution_topology"
+      ]
+    },
+    {
+      "admissibility_constraints": [],
+      "allowed_fault_operator_refs": [
+        "fault.break-trace-link.v1",
+        "fault.drop-observation.v1",
+        "fault.clock-skew.v1"
+      ],
+      "attributes": {},
+      "description": "Required causal linkage is missing",
+      "extensions": {},
+      "family_class": "observability",
+      "family_id": "family.observability.causal-gap.v1",
+      "family_version": "1.0.0",
+      "invariant_refs": [
+        "invariant.observability.required-linkage.v1"
+      ],
+      "minimization": {
+        "dimensions": [
+          "unrelated_roles",
+          "retries",
+          "context_fields",
+          "observations",
+          "fault_schedule"
+        ],
+        "preserve_context_refs": [],
+        "preserve_effect_refs": [],
+        "preserve_role_refs": []
+      },
+      "observability_profiles": [
+        "complete",
+        "missing_boundary",
+        "broken_trace",
+        "clock_skewed"
+      ],
+      "parameter_domains": [],
+      "parent_family_ref": null,
+      "tags": [],
+      "title": "Required causal linkage is missing",
+      "topology_ref": "topology.async-effect.v1",
+      "universe_axes": [
+        "observability_evidence"
+      ]
+    },
+    {
+      "admissibility_constraints": [],
+      "allowed_fault_operator_refs": [
+        "fault.capture-prohibited-field.v1"
+      ],
+      "attributes": {},
+      "description": "Instrumentation captures prohibited sensitive data",
+      "extensions": {},
+      "family_class": "privacy",
+      "family_id": "family.privacy.prohibited-capture.v1",
+      "family_version": "1.0.0",
+      "invariant_refs": [
+        "invariant.privacy.prohibited-capture.v1"
+      ],
+      "minimization": {
+        "dimensions": [
+          "unrelated_roles",
+          "retries",
+          "context_fields",
+          "observations",
+          "fault_schedule"
+        ],
+        "preserve_context_refs": [],
+        "preserve_effect_refs": [],
+        "preserve_role_refs": []
+      },
+      "observability_profiles": [
+        "complete",
+        "redacted"
+      ],
+      "parameter_domains": [],
+      "parent_family_ref": null,
+      "tags": [],
+      "title": "Instrumentation captures prohibited sensitive data",
+      "topology_ref": "topology.sync-chain.v1",
+      "universe_axes": [
+        "isolation_privacy",
+        "observability_evidence"
+      ]
+    }
+  ],
+  "fault_operators": [
+    {
+      "attributes": {},
+      "description": "Drop required context",
+      "kind": "drop_context_field",
+      "operator_class": "semantic",
+      "operator_id": "fault.drop-context.v1",
+      "parameter_domains": [],
+      "target_kinds": [
+        "context",
+        "role"
+      ],
+      "title": "Drop required context",
+      "universe_axes": [
+        "boundary_propagation"
+      ]
+    },
+    {
+      "attributes": {},
+      "description": "Mutate propagated context",
+      "kind": "mutate_context_field",
+      "operator_class": "semantic",
+      "operator_id": "fault.mutate-context.v1",
+      "parameter_domains": [
+        {
+          "default": "tenant-beta",
+          "kind": "enum",
+          "parameter": "replacement",
+          "values": [
+            "tenant-beta",
+            "default",
+            ""
+          ]
+        }
+      ],
+      "target_kinds": [
+        "context",
+        "role"
+      ],
+      "title": "Mutate propagated context",
+      "universe_axes": [
+        "boundary_propagation"
+      ]
+    },
+    {
+      "attributes": {},
+      "description": "Copy context from another isolation scope",
+      "kind": "copy_context_from_other_scope",
+      "operator_class": "semantic",
+      "operator_id": "fault.copy-other-scope-context.v1",
+      "parameter_domains": [],
+      "target_kinds": [
+        "context",
+        "role"
+      ],
+      "title": "Copy context from another isolation scope",
+      "universe_axes": [
+        "isolation_privacy",
+        "time_concurrency"
+      ]
+    },
+    {
+      "attributes": {},
+      "description": "Break causal trace linkage",
+      "kind": "break_trace_link",
+      "operator_class": "observability",
+      "operator_id": "fault.break-trace-link.v1",
+      "parameter_domains": [],
+      "target_kinds": [
+        "edge",
+        "role"
+      ],
+      "title": "Break causal trace linkage",
+      "universe_axes": [
+        "observability_evidence"
+      ]
+    },
+    {
+      "attributes": {},
+      "description": "Collapse independent executions onto one identity",
+      "kind": "collapse_execution_identity",
+      "operator_class": "semantic",
+      "operator_id": "fault.collapse-execution-identity.v1",
+      "parameter_domains": [],
+      "target_kinds": [
+        "system",
+        "role"
+      ],
+      "title": "Collapse independent executions onto one identity",
+      "universe_axes": [
+        "isolation_privacy",
+        "observability_evidence"
+      ]
+    },
+    {
+      "attributes": {},
+      "description": "Repeat a logical durable effect",
+      "kind": "duplicate_effect",
+      "operator_class": "semantic",
+      "operator_id": "fault.duplicate-effect.v1",
+      "parameter_domains": [
+        {
+          "default": 2,
+          "kind": "integer_range",
+          "maximum": 4,
+          "minimum": 2,
+          "parameter": "copies",
+          "step": 1
+        }
+      ],
+      "target_kinds": [
+        "effect",
+        "role"
+      ],
+      "title": "Repeat a logical durable effect",
+      "universe_axes": [
+        "state_effects",
+        "failure_recovery"
+      ]
+    },
+    {
+      "attributes": {},
+      "description": "Omit a required effect",
+      "kind": "omit_effect",
+      "operator_class": "semantic",
+      "operator_id": "fault.omit-effect.v1",
+      "parameter_domains": [],
+      "target_kinds": [
+        "effect"
+      ],
+      "title": "Omit a required effect",
+      "universe_axes": [
+        "state_effects"
+      ]
+    },
+    {
+      "attributes": {},
+      "description": "Fail after the effect but before acknowledgement",
+      "kind": "fail_after_effect",
+      "operator_class": "semantic",
+      "operator_id": "fault.fail-after-effect.v1",
+      "parameter_domains": [],
+      "target_kinds": [
+        "effect",
+        "role"
+      ],
+      "title": "Fail after the effect but before acknowledgement",
+      "universe_axes": [
+        "failure_recovery",
+        "state_effects"
+      ]
+    },
+    {
+      "attributes": {},
+      "description": "Delay an operation",
+      "kind": "delay_operation",
+      "operator_class": "semantic",
+      "operator_id": "fault.delay-operation.v1",
+      "parameter_domains": [
+        {
+          "default": 100,
+          "kind": "integer_range",
+          "maximum": 1000,
+          "minimum": 10,
+          "parameter": "delay_ms",
+          "step": 10
+        }
+      ],
+      "target_kinds": [
+        "role"
+      ],
+      "title": "Delay an operation",
+      "universe_axes": [
+        "time_concurrency",
+        "resources_performance"
+      ]
+    },
+    {
+      "attributes": {},
+      "description": "Reorder operations across a required temporal boundary",
+      "kind": "reorder_operations",
+      "operator_class": "semantic",
+      "operator_id": "fault.reorder-operations.v1",
+      "parameter_domains": [],
+      "target_kinds": [
+        "edge",
+        "role"
+      ],
+      "title": "Reorder operations across a required temporal boundary",
+      "universe_axes": [
+        "time_concurrency"
+      ]
+    },
+    {
+      "attributes": {},
+      "description": "Drop source evidence",
+      "kind": "drop_observation",
+      "operator_class": "observability",
+      "operator_id": "fault.drop-observation.v1",
+      "parameter_domains": [],
+      "target_kinds": [
+        "observation",
+        "role"
+      ],
+      "title": "Drop source evidence",
+      "universe_axes": [
+        "observability_evidence"
+      ]
+    },
+    {
+      "attributes": {},
+      "description": "Skew one source clock",
+      "kind": "clock_skew",
+      "operator_class": "observability",
+      "operator_id": "fault.clock-skew.v1",
+      "parameter_domains": [
+        {
+          "default": 500,
+          "kind": "integer_range",
+          "maximum": 1000,
+          "minimum": -1000,
+          "parameter": "skew_ms",
+          "step": 100
+        }
+      ],
+      "target_kinds": [
+        "role"
+      ],
+      "title": "Skew one source clock",
+      "universe_axes": [
+        "time_concurrency",
+        "observability_evidence"
+      ]
+    },
+    {
+      "attributes": {},
+      "description": "Inject evidence that contradicts another source",
+      "kind": "inject_contradictory_observation",
+      "operator_class": "observability",
+      "operator_id": "fault.contradictory-observation.v1",
+      "parameter_domains": [],
+      "target_kinds": [
+        "observation",
+        "effect"
+      ],
+      "title": "Inject evidence that contradicts another source",
+      "universe_axes": [
+        "observability_evidence"
+      ]
+    },
+    {
+      "attributes": {},
+      "description": "Introduce producer and consumer schema skew",
+      "kind": "schema_version_skew",
+      "operator_class": "semantic",
+      "operator_id": "fault.schema-version-skew.v1",
+      "parameter_domains": [],
+      "target_kinds": [
+        "edge",
+        "role"
+      ],
+      "title": "Introduce producer and consumer schema skew",
+      "universe_axes": [
+        "contract_evolution",
+        "deployment_configuration"
+      ]
+    },
+    {
+      "attributes": {},
+      "description": "Capture a prohibited sensitive value",
+      "kind": "capture_prohibited_field",
+      "operator_class": "observability",
+      "operator_id": "fault.capture-prohibited-field.v1",
+      "parameter_domains": [],
+      "target_kinds": [
+        "observation",
+        "system"
+      ],
+      "title": "Capture a prohibited sensitive value",
+      "universe_axes": [
+        "isolation_privacy",
+        "observability_evidence"
+      ]
+    },
+    {
+      "attributes": {},
+      "description": "Exhaust a bounded resource",
+      "kind": "exhaust_resource",
+      "operator_class": "semantic",
+      "operator_id": "fault.exhaust-resource.v1",
+      "parameter_domains": [],
+      "target_kinds": [
+        "resource",
+        "role"
+      ],
+      "title": "Exhaust a bounded resource",
+      "universe_axes": [
+        "resources_performance"
+      ]
+    },
+    {
+      "attributes": {},
+      "description": "Amplify logical work",
+      "kind": "amplify_operation",
+      "operator_class": "semantic",
+      "operator_id": "fault.amplify-operation.v1",
+      "parameter_domains": [
+        {
+          "default": 5,
+          "kind": "integer_range",
+          "maximum": 20,
+          "minimum": 2,
+          "parameter": "factor",
+          "step": 1
+        }
+      ],
+      "target_kinds": [
+        "role"
+      ],
+      "title": "Amplify logical work",
+      "universe_axes": [
+        "resources_performance"
+      ]
+    }
+  ],
+  "invariant_catalog": {
+    "invariant.consistency.required-freshness.v1": "Observed state meets its declared freshness contract.",
+    "invariant.context.forbidden-propagation.v1": "Forbidden context does not cross the selected boundary.",
+    "invariant.context.required-continuity.v1": "Required context remains equivalent across its declared path.",
+    "invariant.contract.schema-compatible.v1": "Producer and consumer schema ranges overlap.",
+    "invariant.effect.at-most-once.v1": "A logical effect becomes durable no more than its allowed count.",
+    "invariant.effect.required-eventuality.v1": "A required effect eventually occurs.",
+    "invariant.identity.execution-isolation.v1": "Independent executions remain distinguishable.",
+    "invariant.identity.workflow-correlatable.v1": "One logical workflow remains correlatable across boundaries.",
+    "invariant.observability.required-linkage.v1": "Required execution linkage exists across boundaries.",
+    "invariant.ordering.read-after-visibility.v1": "Dependent reads occur only after producer state becomes visible.",
+    "invariant.performance.work-amplification.v1": "Logical work remains within its expected amplification bound.",
+    "invariant.privacy.prohibited-capture.v1": "Prohibited sensitive values are not captured or exported.",
+    "invariant.resource.capacity-bounded.v1": "Required resource capacity remains within declared limits."
+  },
+  "registry_id": "registry.tracecase-core",
+  "registry_version": "1.0.0",
+  "semantic_universe_version": "1.0.0",
+  "topologies": [
+    {
+      "attributes": {},
+      "contexts": [
+        {
+          "attributes": {},
+          "contract_id": "contract.tenant-context",
+          "field_name": "tenant_id",
+          "namespace": "tenant",
+          "propagation_contract": "required",
+          "required_role_refs": [
+            "role.consume"
+          ],
+          "sensitivity": [
+            "tenant_identifier"
+          ],
+          "source_role_ref": "role.request",
+          "value": "tenant-alpha"
+        },
+        {
+          "attributes": {},
+          "contract_id": "contract.workflow-context",
+          "field_name": "run_id",
+          "namespace": "workflow",
+          "propagation_contract": "required",
+          "required_role_refs": [
+            "role.publish",
+            "role.consume"
+          ],
+          "sensitivity": [
+            "internal"
+          ],
+          "source_role_ref": "role.request",
+          "value": "workflow-synthetic-001"
+        }
+      ],
+      "edges": [
+        {
+          "attributes": {},
+          "boundary_kind": "message_publish",
+          "boundary_name": "asynchronous publish",
+          "derivation": "explicit",
+          "edge_id": "edge.request-publish",
+          "extensions": {},
+          "relation_kind": "publishes",
+          "source_role_ref": "role.request",
+          "target_role_ref": "role.publish"
+        },
+        {
+          "attributes": {},
+          "boundary_kind": "message_consume",
+          "boundary_name": "message delivery",
+          "derivation": "source_native",
+          "edge_id": "edge.publish-consume",
+          "extensions": {},
+          "relation_kind": "delivers",
+          "source_role_ref": "role.publish",
+          "target_role_ref": "role.consume"
+        },
+        {
+          "attributes": {},
+          "boundary_kind": "database",
+          "boundary_name": "durable write",
+          "derivation": "explicit",
+          "edge_id": "edge.consume-write",
+          "extensions": {},
+          "relation_kind": "writes_to",
+          "source_role_ref": "role.consume",
+          "target_role_ref": "role.write"
+        }
+      ],
+      "effects": [
+        {
+          "attributes": {},
+          "contract_id": "contract.workflow-effect",
+          "effect_kind": "state_update",
+          "idempotency_key": "workflow-synthetic-001-complete",
+          "logical_effect_key": "workflow/synthetic-001/completed",
+          "maximum_durable_count": 1,
+          "operation": "mark workflow complete",
+          "producer_role_ref": "role.consume",
+          "required": true,
+          "target_resource_ref": "resource.workflow-state"
+        }
+      ],
+      "motif": "async_handoff",
+      "resources": [
+        {
+          "attributes": {},
+          "kind": "logical_aggregate",
+          "name": "Workflow state",
+          "owner_role_ref": "role.write",
+          "resource_id": "resource.workflow-state",
+          "sensitivity": [
+            "tenant_identifier"
+          ]
+        }
+      ],
+      "roles": [
+        {
+          "attributes": {},
+          "component_kind": "api",
+          "component_role": "producer",
+          "default_status": "ok",
+          "extensions": {},
+          "node_kind": "request_handler",
+          "operation": "workflow.accept",
+          "role_id": "role.request",
+          "stage": 0
+        },
+        {
+          "attributes": {},
+          "component_kind": "api",
+          "component_role": "producer",
+          "default_status": "ok",
+          "extensions": {},
+          "node_kind": "message_publish",
+          "operation": "workflow.publish",
+          "role_id": "role.publish",
+          "stage": 1
+        },
+        {
+          "attributes": {},
+          "component_kind": "worker",
+          "component_role": "consumer",
+          "default_status": "ok",
+          "extensions": {},
+          "node_kind": "task_attempt",
+          "operation": "workflow.consume",
+          "role_id": "role.consume",
+          "stage": 2
+        },
+        {
+          "attributes": {},
+          "component_kind": "database",
+          "component_role": "state-store",
+          "default_status": "committed",
+          "extensions": {},
+          "node_kind": "write",
+          "operation": "workflow.persist",
+          "role_id": "role.write",
+          "stage": 3
+        }
+      ],
+      "topology_id": "topology.async-effect.v1"
+    },
+    {
+      "attributes": {},
+      "contexts": [
+        {
+          "attributes": {},
+          "contract_id": "contract.transaction-workflow",
+          "field_name": "run_id",
+          "namespace": "workflow",
+          "propagation_contract": "required",
+          "required_role_refs": [
+            "role.tx-consume"
+          ],
+          "sensitivity": [],
+          "source_role_ref": "role.tx-request",
+          "value": "workflow-transaction-001"
+        }
+      ],
+      "edges": [
+        {
+          "attributes": {},
+          "boundary_kind": "transaction",
+          "boundary_name": null,
+          "derivation": "explicit",
+          "edge_id": "edge.request-transaction",
+          "extensions": {},
+          "relation_kind": "contains",
+          "source_role_ref": "role.tx-request",
+          "target_role_ref": "role.transaction"
+        },
+        {
+          "attributes": {},
+          "boundary_kind": "message_publish",
+          "boundary_name": null,
+          "derivation": "explicit",
+          "edge_id": "edge.request-tx-publish",
+          "extensions": {},
+          "relation_kind": "publishes",
+          "source_role_ref": "role.tx-request",
+          "target_role_ref": "role.tx-publish"
+        },
+        {
+          "attributes": {},
+          "boundary_kind": "message_consume",
+          "boundary_name": null,
+          "derivation": "explicit",
+          "edge_id": "edge.tx-publish-consume",
+          "extensions": {},
+          "relation_kind": "delivers",
+          "source_role_ref": "role.tx-publish",
+          "target_role_ref": "role.tx-consume"
+        },
+        {
+          "attributes": {},
+          "boundary_kind": "database",
+          "boundary_name": null,
+          "derivation": "explicit",
+          "edge_id": "edge.consume-read",
+          "extensions": {},
+          "relation_kind": "reads_from",
+          "source_role_ref": "role.tx-consume",
+          "target_role_ref": "role.read"
+        }
+      ],
+      "effects": [],
+      "motif": "transactional_async",
+      "resources": [
+        {
+          "attributes": {},
+          "kind": "database_row",
+          "name": "Transactional state",
+          "owner_role_ref": "role.transaction",
+          "resource_id": "resource.transactional-state",
+          "sensitivity": []
+        }
+      ],
+      "roles": [
+        {
+          "attributes": {},
+          "component_kind": "api",
+          "component_role": "producer",
+          "default_status": "ok",
+          "extensions": {},
+          "node_kind": "request_handler",
+          "operation": "state.create-request",
+          "role_id": "role.tx-request",
+          "stage": 0
+        },
+        {
+          "attributes": {},
+          "component_kind": "database",
+          "component_role": "state-store",
+          "default_status": "committed",
+          "extensions": {},
+          "node_kind": "transaction",
+          "operation": "state.transaction",
+          "role_id": "role.transaction",
+          "stage": 1
+        },
+        {
+          "attributes": {},
+          "component_kind": "api",
+          "component_role": "producer",
+          "default_status": "ok",
+          "extensions": {},
+          "node_kind": "message_publish",
+          "operation": "state.publish",
+          "role_id": "role.tx-publish",
+          "stage": 2
+        },
+        {
+          "attributes": {},
+          "component_kind": "worker",
+          "component_role": "consumer",
+          "default_status": "ok",
+          "extensions": {},
+          "node_kind": "task_attempt",
+          "operation": "state.consume",
+          "role_id": "role.tx-consume",
+          "stage": 3
+        },
+        {
+          "attributes": {},
+          "component_kind": "database",
+          "component_role": "state-store",
+          "default_status": "ok",
+          "extensions": {},
+          "node_kind": "read",
+          "operation": "state.read",
+          "role_id": "role.read",
+          "stage": 4
+        }
+      ],
+      "topology_id": "topology.transactional-async.v1"
+    },
+    {
+      "attributes": {},
+      "contexts": [
+        {
+          "attributes": {},
+          "contract_id": "contract.request-context",
+          "field_name": "request_id",
+          "namespace": "request",
+          "propagation_contract": "required",
+          "required_role_refs": [
+            "role.service"
+          ],
+          "sensitivity": [],
+          "source_role_ref": "role.client",
+          "value": "request-synthetic-001"
+        }
+      ],
+      "edges": [
+        {
+          "attributes": {},
+          "boundary_kind": "http",
+          "boundary_name": null,
+          "derivation": "explicit",
+          "edge_id": "edge.client-service",
+          "extensions": {},
+          "relation_kind": "invokes",
+          "source_role_ref": "role.client",
+          "target_role_ref": "role.service"
+        },
+        {
+          "attributes": {},
+          "boundary_kind": "external_dependency",
+          "boundary_name": null,
+          "derivation": "explicit",
+          "edge_id": "edge.service-dependency",
+          "extensions": {},
+          "relation_kind": "invokes",
+          "source_role_ref": "role.service",
+          "target_role_ref": "role.dependency"
+        }
+      ],
+      "effects": [],
+      "motif": "synchronous_chain",
+      "resources": [],
+      "roles": [
+        {
+          "attributes": {},
+          "component_kind": "client",
+          "component_role": null,
+          "default_status": "ok",
+          "extensions": {},
+          "node_kind": "client_request",
+          "operation": "client.invoke",
+          "role_id": "role.client",
+          "stage": 0
+        },
+        {
+          "attributes": {},
+          "component_kind": "service",
+          "component_role": null,
+          "default_status": "ok",
+          "extensions": {},
+          "node_kind": "service_operation",
+          "operation": "service.handle",
+          "role_id": "role.service",
+          "stage": 1
+        },
+        {
+          "attributes": {},
+          "component_kind": "external_service",
+          "component_role": null,
+          "default_status": "ok",
+          "extensions": {},
+          "node_kind": "external_request",
+          "operation": "dependency.call",
+          "role_id": "role.dependency",
+          "stage": 2
+        }
+      ],
+      "topology_id": "topology.sync-chain.v1"
+    },
+    {
+      "attributes": {},
+      "contexts": [],
+      "edges": [
+        {
+          "attributes": {},
+          "boundary_kind": "message_publish",
+          "boundary_name": null,
+          "derivation": "explicit",
+          "edge_id": "edge.fan-root-child",
+          "extensions": {},
+          "relation_kind": "spawns",
+          "source_role_ref": "role.fan-root",
+          "target_role_ref": "role.fan-child"
+        }
+      ],
+      "effects": [],
+      "motif": "fan_out",
+      "resources": [],
+      "roles": [
+        {
+          "attributes": {},
+          "component_kind": "service",
+          "component_role": null,
+          "default_status": "ok",
+          "extensions": {},
+          "node_kind": "service_operation",
+          "operation": "fanout.root",
+          "role_id": "role.fan-root",
+          "stage": 0
+        },
+        {
+          "attributes": {},
+          "component_kind": "worker",
+          "component_role": null,
+          "default_status": "ok",
+          "extensions": {},
+          "node_kind": "task_attempt",
+          "operation": "fanout.child",
+          "role_id": "role.fan-child",
+          "stage": 1
+        }
+      ],
+      "topology_id": "topology.fan-out.v1"
+    }
+  ]
+}

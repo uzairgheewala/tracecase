@@ -56,6 +56,14 @@ class BundleReader:
         temporary = BundleBuilder.read_archive_temporarily(path)
         return cls(Path(temporary.name)), temporary
 
+    def has_artifact(self, relative_path: str) -> bool:
+        return (self.bundle_path / relative_path).is_file()
+
+    def read_optional_json(self, relative_path: str) -> Any | None:
+        if not self.has_artifact(relative_path):
+            return None
+        return self.read_json(relative_path)
+
     def read_json(self, relative_path: str) -> Any:
         path = self.bundle_path / relative_path
         with path.open("r", encoding="utf-8") as handle:
@@ -144,7 +152,7 @@ class BundleReader:
             [
                 entry
                 for entry in self.content_index.entries
-                if entry.layer in {"specification", "provenance", "evidence", "model"}
+                if entry.layer in {"specification", "provenance", "evidence", "model", "synthetic", "collection"}
             ]
         )
         current_bundle = self._digest_index(list(self.content_index.entries))

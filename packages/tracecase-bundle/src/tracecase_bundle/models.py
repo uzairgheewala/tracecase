@@ -41,6 +41,19 @@ class AnalysisDescriptor(TracecaseModel):
     analysis_runs_ref: str | None = None
 
 
+class ScenarioDescriptor(TracecaseModel):
+    family_ref: str | None = None
+    definition_ref: str | None = None
+    instance_ref: str | None = None
+    expectations_ref: str | None = None
+
+
+class CollectionDescriptor(TracecaseModel):
+    status: str = "not_collected"
+    request_ref: str | None = None
+    result_ref: str | None = None
+
+
 class IntegrityDescriptor(TracecaseModel):
     evidence_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
     bundle_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
@@ -67,6 +80,8 @@ class BundleManifest(TracecaseModel):
     case_ref: str = "specification/case.json"
     privacy: PrivacyDescriptor = Field(default_factory=PrivacyDescriptor)
     analysis: AnalysisDescriptor = Field(default_factory=AnalysisDescriptor)
+    scenario: ScenarioDescriptor | None = None
+    collection: CollectionDescriptor = Field(default_factory=CollectionDescriptor)
     integrity: IntegrityDescriptor
 
     @field_validator("created_at", "frozen_at")

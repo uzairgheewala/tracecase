@@ -13,6 +13,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework",
     "cases",
+    "scenarios",
 ]
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",

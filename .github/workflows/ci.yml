@@ -1,4 +1,4 @@
-name: milestone-a
+name: milestone-b
 
 on:
   push:
@@ -25,8 +25,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: npm
-          cache-dependency-path: apps/workbench/package-lock.json
       - working-directory: apps/workbench
         run: npm install
       - working-directory: apps/workbench

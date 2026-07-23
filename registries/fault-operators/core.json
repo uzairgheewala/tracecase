@@ -1,0 +1,325 @@
+[
+  {
+    "attributes": {},
+    "description": "Drop required context",
+    "kind": "drop_context_field",
+    "operator_class": "semantic",
+    "operator_id": "fault.drop-context.v1",
+    "parameter_domains": [],
+    "target_kinds": [
+      "context",
+      "role"
+    ],
+    "title": "Drop required context",
+    "universe_axes": [
+      "boundary_propagation"
+    ]
+  },
+  {
+    "attributes": {},
+    "description": "Mutate propagated context",
+    "kind": "mutate_context_field",
+    "operator_class": "semantic",
+    "operator_id": "fault.mutate-context.v1",
+    "parameter_domains": [
+      {
+        "default": "tenant-beta",
+        "kind": "enum",
+        "parameter": "replacement",
+        "values": [
+          "tenant-beta",
+          "default",
+          ""
+        ]
+      }
+    ],
+    "target_kinds": [
+      "context",
+      "role"
+    ],
+    "title": "Mutate propagated context",
+    "universe_axes": [
+      "boundary_propagation"
+    ]
+  },
+  {
+    "attributes": {},
+    "description": "Copy context from another isolation scope",
+    "kind": "copy_context_from_other_scope",
+    "operator_class": "semantic",
+    "operator_id": "fault.copy-other-scope-context.v1",
+    "parameter_domains": [],
+    "target_kinds": [
+      "context",
+      "role"
+    ],
+    "title": "Copy context from another isolation scope",
+    "universe_axes": [
+      "isolation_privacy",
+      "time_concurrency"
+    ]
+  },
+  {
+    "attributes": {},
+    "description": "Break causal trace linkage",
+    "kind": "break_trace_link",
+    "operator_class": "observability",
+    "operator_id": "fault.break-trace-link.v1",
+    "parameter_domains": [],
+    "target_kinds": [
+      "edge",
+      "role"
+    ],
+    "title": "Break causal trace linkage",
+    "universe_axes": [
+      "observability_evidence"
+    ]
+  },
+  {
+    "attributes": {},
+    "description": "Collapse independent executions onto one identity",
+    "kind": "collapse_execution_identity",
+    "operator_class": "semantic",
+    "operator_id": "fault.collapse-execution-identity.v1",
+    "parameter_domains": [],
+    "target_kinds": [
+      "system",
+      "role"
+    ],
+    "title": "Collapse independent executions onto one identity",
+    "universe_axes": [
+      "isolation_privacy",
+      "observability_evidence"
+    ]
+  },
+  {
+    "attributes": {},
+    "description": "Repeat a logical durable effect",
+    "kind": "duplicate_effect",
+    "operator_class": "semantic",
+    "operator_id": "fault.duplicate-effect.v1",
+    "parameter_domains": [
+      {
+        "default": 2,
+        "kind": "integer_range",
+        "maximum": 4,
+        "minimum": 2,
+        "parameter": "copies",
+        "step": 1
+      }
+    ],
+    "target_kinds": [
+      "effect",
+      "role"
+    ],
+    "title": "Repeat a logical durable effect",
+    "universe_axes": [
+      "state_effects",
+      "failure_recovery"
+    ]
+  },
+  {
+    "attributes": {},
+    "description": "Omit a required effect",
+    "kind": "omit_effect",
+    "operator_class": "semantic",
+    "operator_id": "fault.omit-effect.v1",
+    "parameter_domains": [],
+    "target_kinds": [
+      "effect"
+    ],
+    "title": "Omit a required effect",
+    "universe_axes": [
+      "state_effects"
+    ]
+  },
+  {
+    "attributes": {},
+    "description": "Fail after the effect but before acknowledgement",
+    "kind": "fail_after_effect",
+    "operator_class": "semantic",
+    "operator_id": "fault.fail-after-effect.v1",
+    "parameter_domains": [],
+    "target_kinds": [
+      "effect",
+      "role"
+    ],
+    "title": "Fail after the effect but before acknowledgement",
+    "universe_axes": [
+      "failure_recovery",
+      "state_effects"
+    ]
+  },
+  {
+    "attributes": {},
+    "description": "Delay an operation",
+    "kind": "delay_operation",
+    "operator_class": "semantic",
+    "operator_id": "fault.delay-operation.v1",
+    "parameter_domains": [
+      {
+        "default": 100,
+        "kind": "integer_range",
+        "maximum": 1000,
+        "minimum": 10,
+        "parameter": "delay_ms",
+        "step": 10
+      }
+    ],
+    "target_kinds": [
+      "role"
+    ],
+    "title": "Delay an operation",
+    "universe_axes": [
+      "time_concurrency",
+      "resources_performance"
+    ]
+  },
+  {
+    "attributes": {},
+    "description": "Reorder operations across a required temporal boundary",
+    "kind": "reorder_operations",
+    "operator_class": "semantic",
+    "operator_id": "fault.reorder-operations.v1",
+    "parameter_domains": [],
+    "target_kinds": [
+      "edge",
+      "role"
+    ],
+    "title": "Reorder operations across a required temporal boundary",
+    "universe_axes": [
+      "time_concurrency"
+    ]
+  },
+  {
+    "attributes": {},
+    "description": "Drop source evidence",
+    "kind": "drop_observation",
+    "operator_class": "observability",
+    "operator_id": "fault.drop-observation.v1",
+    "parameter_domains": [],
+    "target_kinds": [
+      "observation",
+      "role"
+    ],
+    "title": "Drop source evidence",
+    "universe_axes": [
+      "observability_evidence"
+    ]
+  },
+  {
+    "attributes": {},
+    "description": "Skew one source clock",
+    "kind": "clock_skew",
+    "operator_class": "observability",
+    "operator_id": "fault.clock-skew.v1",
+    "parameter_domains": [
+      {
+        "default": 500,
+        "kind": "integer_range",
+        "maximum": 1000,
+        "minimum": -1000,
+        "parameter": "skew_ms",
+        "step": 100
+      }
+    ],
+    "target_kinds": [
+      "role"
+    ],
+    "title": "Skew one source clock",
+    "universe_axes": [
+      "time_concurrency",
+      "observability_evidence"
+    ]
+  },
+  {
+    "attributes": {},
+    "description": "Inject evidence that contradicts another source",
+    "kind": "inject_contradictory_observation",
+    "operator_class": "observability",
+    "operator_id": "fault.contradictory-observation.v1",
+    "parameter_domains": [],
+    "target_kinds": [
+      "observation",
+      "effect"
+    ],
+    "title": "Inject evidence that contradicts another source",
+    "universe_axes": [
+      "observability_evidence"
+    ]
+  },
+  {
+    "attributes": {},
+    "description": "Introduce producer and consumer schema skew",
+    "kind": "schema_version_skew",
+    "operator_class": "semantic",
+    "operator_id": "fault.schema-version-skew.v1",
+    "parameter_domains": [],
+    "target_kinds": [
+      "edge",
+      "role"
+    ],
+    "title": "Introduce producer and consumer schema skew",
+    "universe_axes": [
+      "contract_evolution",
+      "deployment_configuration"
+    ]
+  },
+  {
+    "attributes": {},
+    "description": "Capture a prohibited sensitive value",
+    "kind": "capture_prohibited_field",
+    "operator_class": "observability",
+    "operator_id": "fault.capture-prohibited-field.v1",
+    "parameter_domains": [],
+    "target_kinds": [
+      "observation",
+      "system"
+    ],
+    "title": "Capture a prohibited sensitive value",
+    "universe_axes": [
+      "isolation_privacy",
+      "observability_evidence"
+    ]
+  },
+  {
+    "attributes": {},
+    "description": "Exhaust a bounded resource",
+    "kind": "exhaust_resource",
+    "operator_class": "semantic",
+    "operator_id": "fault.exhaust-resource.v1",
+    "parameter_domains": [],
+    "target_kinds": [
+      "resource",
+      "role"
+    ],
+    "title": "Exhaust a bounded resource",
+    "universe_axes": [
+      "resources_performance"
+    ]
+  },
+  {
+    "attributes": {},
+    "description": "Amplify logical work",
+    "kind": "amplify_operation",
+    "operator_class": "semantic",
+    "operator_id": "fault.amplify-operation.v1",
+    "parameter_domains": [
+      {
+        "default": 5,
+        "kind": "integer_range",
+        "maximum": 20,
+        "minimum": 2,
+        "parameter": "factor",
+        "step": 1
+      }
+    ],
+    "target_kinds": [
+      "role"
+    ],
+    "title": "Amplify logical work",
+    "universe_axes": [
+      "resources_performance"
+    ]
+  }
+]

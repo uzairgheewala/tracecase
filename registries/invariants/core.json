@@ -1,0 +1,15 @@
+{
+  "invariant.consistency.required-freshness.v1": "Observed state meets its declared freshness contract.",
+  "invariant.context.forbidden-propagation.v1": "Forbidden context does not cross the selected boundary.",
+  "invariant.context.required-continuity.v1": "Required context remains equivalent across its declared path.",
+  "invariant.contract.schema-compatible.v1": "Producer and consumer schema ranges overlap.",
+  "invariant.effect.at-most-once.v1": "A logical effect becomes durable no more than its allowed count.",
+  "invariant.effect.required-eventuality.v1": "A required effect eventually occurs.",
+  "invariant.identity.execution-isolation.v1": "Independent executions remain distinguishable.",
+  "invariant.identity.workflow-correlatable.v1": "One logical workflow remains correlatable across boundaries.",
+  "invariant.observability.required-linkage.v1": "Required execution linkage exists across boundaries.",
+  "invariant.ordering.read-after-visibility.v1": "Dependent reads occur only after producer state becomes visible.",
+  "invariant.performance.work-amplification.v1": "Logical work remains within its expected amplification bound.",
+  "invariant.privacy.prohibited-capture.v1": "Prohibited sensitive values are not captured or exported.",
+  "invariant.resource.capacity-bounded.v1": "Required resource capacity remains within declared limits."
+}

@@ -5,6 +5,7 @@ from pathlib import Path
 
 from django.conf import settings
 from tracecase_bundle import BundleReader
+from tracecase_graph import AssembledExecutionGraph, GraphAssembler, TimelineModel
 
 
 @dataclass(frozen=True)
@@ -17,7 +18,10 @@ class CaseSummary:
     path: str
     valid: bool
     node_count: int
+    relation_count: int
     effect_count: int
+    warning_count: int
+    scenario_family: str | None
 
 
 class CaseRepository:
@@ -44,9 +48,31 @@ class CaseRepository:
                     return reader
         raise FileNotFoundError(case_id)
 
+    def get_assembled_graph(self, case_id: str) -> AssembledExecutionGraph:
+        reader = self.get_reader(case_id)
+        if reader.has_artifact("analysis/assembled_graph.json"):
+            return AssembledExecutionGraph.model_validate(
+                reader.read_json("analysis/assembled_graph.json")
+            )
+        case = reader.load_case()
+        return GraphAssembler().assemble(case.evidence.execution)
+
+    def get_timeline(self, case_id: str) -> TimelineModel:
+        reader = self.get_reader(case_id)
+        if reader.has_artifact("analysis/timeline.json"):
+            return TimelineModel.model_validate(reader.read_json("analysis/timeline.json"))
+        case = reader.load_case()
+        graph = self.get_assembled_graph(case_id)
+        return GraphAssembler().timeline(graph, case.system)
+
     def _summarize(self, path: Path) -> CaseSummary:
         reader = BundleReader(path)
         case = reader.load_case()
+        graph = (
+            AssembledExecutionGraph.model_validate(reader.read_json("analysis/assembled_graph.json"))
+            if reader.has_artifact("analysis/assembled_graph.json")
+            else GraphAssembler().assemble(case.evidence.execution)
+        )
         return CaseSummary(
             case_id=reader.manifest.case_id,
             bundle_id=reader.manifest.bundle_id,
@@ -56,5 +82,8 @@ class CaseRepository:
             path=str(path),
             valid=reader.verify().valid,
             node_count=len(case.evidence.execution.nodes),
+            relation_count=len(graph.relations),
             effect_count=len(case.evidence.execution.effects),
+            warning_count=len(graph.report.warnings),
+            scenario_family=(reader.manifest.scenario.family_ref if reader.manifest.scenario else None),
         )

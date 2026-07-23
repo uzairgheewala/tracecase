@@ -1,0 +1,1 @@
+[{"attributes":{},"description":"Break causal trace linkage","kind":"break_trace_link","operator_class":"observability","operator_id":"fault.break-trace-link.v1","parameter_domains":[],"target_kinds":["edge","role"],"title":"Break causal trace linkage","universe_axes":["observability_evidence"]}]

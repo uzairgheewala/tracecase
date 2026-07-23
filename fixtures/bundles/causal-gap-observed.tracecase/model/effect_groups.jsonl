@@ -1,0 +1,1 @@
+{"attributes":{},"durable_count":1,"group_id":"effect-group.aaa91daa63affae7","idempotency_keys":["workflow-synthetic-001-complete"],"logical_effect_key":"workflow/synthetic-001/completed","member_effect_refs":["effect.synthetic.contract.workflow-effect.1"]}

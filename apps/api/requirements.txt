@@ -4,3 +4,6 @@ django-cors-headers>=4.7,<5.0
 pydantic>=2.8,<3
 -e ../../packages/tracecase-model
 -e ../../packages/tracecase-bundle
+-e ../../packages/tracecase-scenarios
+-e ../../packages/tracecase-collectors
+-e ../../packages/tracecase-graph
