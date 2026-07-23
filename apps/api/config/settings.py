@@ -10,6 +10,7 @@ ALLOWED_HOSTS = [item for item in os.environ.get("DJANGO_ALLOWED_HOSTS", "localh
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.staticfiles",
+    "django.contrib.auth",
     "corsheaders",
     "rest_framework",
     "cases",
