@@ -4,19 +4,22 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tracecase-cli"
-version = "0.4.0"
+version = "0.5.0"
 description = "Tracecase command-line interface"
 requires-python = ">=3.11"
 dependencies = [
-  "tracecase-model>=0.4.0",
-  "tracecase-bundle>=0.4.0",
-  "tracecase-scenarios>=0.4.0",
-  "tracecase-graph>=0.4.0",
-  "tracecase-invariants>=0.4.0",
-  "tracecase-analyzers>=0.4.0",
-  "tracecase-compare>=0.4.0",
-  "tracecase-policy>=0.4.0",
-  "tracecase-lab>=0.4.0",
+  "tracecase-model>=0.5.0",
+  "tracecase-bundle>=0.5.0",
+  "tracecase-scenarios>=0.5.0",
+  "tracecase-graph>=0.5.0",
+  "tracecase-invariants>=0.5.0",
+  "tracecase-analyzers>=0.5.0",
+  "tracecase-compare>=0.5.0",
+  "tracecase-policy>=0.5.0",
+  "tracecase-lab>=0.5.0",
+  "tracecase-coverage>=0.5.0",
+  "tracecase-compat>=0.5.0",
+  "tracecase-pathforge>=0.5.0",
 ]
 
 [project.scripts]

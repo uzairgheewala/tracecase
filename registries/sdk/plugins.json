@@ -1,0 +1,5 @@
+{
+  "plugin_contract_version": "1.0.0",
+  "plugin_kinds": ["adapter", "analyzer"],
+  "identity": ["plugin_id", "plugin_version"]
+}

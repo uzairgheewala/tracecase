@@ -429,3 +429,83 @@ export interface LabComparisonResult {
   candidate: LabRunResult;
   comparison: SemanticComparison;
 }
+
+export interface CoveragePoint {
+  point_id: string;
+  dimension: string;
+  key: string;
+  status: string;
+  family_ref?: string;
+  witness_refs: string[];
+  rationale?: string;
+}
+
+export interface CoverageLedger {
+  ledger_id: string;
+  registry_version: string;
+  points: CoveragePoint[];
+  recommendations: Array<{
+    recommendation_id: string;
+    family_ref: string;
+    priority: number;
+    uncovered_point_refs: string[];
+    suggested_fault_ref?: string;
+    suggested_observability_profile?: string;
+    rationale: string;
+  }>;
+  summary: Record<string, number>;
+  attributes: Record<string, unknown>;
+}
+
+export interface BundleHealthResponse {
+  compatibility: {
+    assessment_id: string;
+    bundle_ref: string;
+    status: string;
+    format_version: string;
+    supported_format_versions: string[];
+    issues: Array<{ code: string; severity: string; message: string; path?: string }>;
+    extension_namespaces: string[];
+    recommended_actions: string[];
+  };
+  health: {
+    report_id: string;
+    bundle_ref: string;
+    valid: boolean;
+    missing_paths: string[];
+    mismatched_paths: string[];
+    unexpected_paths: string[];
+    malformed_jsonl: string[];
+    record_counts: Record<string, number>;
+    recoverable: boolean;
+    recommendations: string[];
+  };
+}
+
+export interface PathforgeBinding {
+  binding_id: string;
+  workflow_kind: string;
+  title: string;
+  extension_namespace: string;
+  generic_invariants: string[];
+  domain_event_types: string[];
+}
+
+export interface PathforgeRunPayload {
+  result: {
+    binding: PathforgeBinding;
+    case_id: string;
+    graph_id: string;
+    invariant_summary: Record<string, number>;
+    finding_count: number;
+    deep_link: string;
+    attributes: Record<string, unknown>;
+  };
+  case: Record<string, unknown>;
+}
+
+export interface PathforgeComparisonPayload {
+  baseline: Record<string, unknown>;
+  candidate: Record<string, unknown>;
+  comparison: SemanticComparison;
+}

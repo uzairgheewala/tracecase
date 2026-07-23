@@ -10,6 +10,7 @@ RULES = {
         "tracecase_bundle", "tracecase_cli", "tracecase_scenarios",
         "tracecase_collectors", "tracecase_graph", "tracecase_invariants",
         "tracecase_analyzers", "tracecase_compare", "tracecase_policy", "tracecase_lab",
+        "tracecase_coverage", "tracecase_compat", "tracecase_sdk", "tracecase_pathforge",
     },
     ROOT / "packages" / "tracecase-bundle" / "src": {
         "django", "rest_framework", "celery", "opentelemetry",
@@ -33,6 +34,7 @@ RULES = {
         "tracecase_bundle", "tracecase_scenarios", "tracecase_collectors",
         "tracecase_invariants", "tracecase_analyzers", "tracecase_compare",
         "tracecase_cli", "tracecase_policy", "tracecase_lab",
+        "tracecase_coverage", "tracecase_compat", "tracecase_sdk", "tracecase_pathforge",
     },
     ROOT / "packages" / "tracecase-invariants" / "src": {
         "django", "rest_framework", "celery", "opentelemetry",
@@ -53,11 +55,36 @@ RULES = {
         "django", "rest_framework", "celery", "opentelemetry",
         "tracecase_cli", "tracecase_scenarios", "tracecase_collectors",
         "tracecase_compare", "tracecase_lab",
+        "tracecase_coverage", "tracecase_compat", "tracecase_sdk", "tracecase_pathforge",
     },
     ROOT / "packages" / "tracecase-lab" / "src": {
         "django", "rest_framework", "celery", "opentelemetry",
         "tracecase_cli", "tracecase_policy", "tracecase_scenarios",
         "tracecase_collectors",
+    },
+    ROOT / "packages" / "tracecase-coverage" / "src": {
+        "django", "rest_framework", "celery", "opentelemetry",
+        "tracecase_bundle", "tracecase_collectors", "tracecase_compare",
+        "tracecase_policy", "tracecase_lab", "tracecase_compat",
+        "tracecase_sdk", "tracecase_pathforge", "tracecase_cli",
+    },
+    ROOT / "packages" / "tracecase-compat" / "src": {
+        "django", "rest_framework", "celery", "opentelemetry",
+        "tracecase_scenarios", "tracecase_collectors", "tracecase_invariants",
+        "tracecase_analyzers", "tracecase_compare", "tracecase_policy",
+        "tracecase_lab", "tracecase_coverage", "tracecase_sdk",
+        "tracecase_pathforge", "tracecase_cli",
+    },
+    ROOT / "packages" / "tracecase-sdk" / "src": {
+        "django", "rest_framework", "celery", "opentelemetry",
+        "tracecase_bundle", "tracecase_scenarios", "tracecase_collectors",
+        "tracecase_graph", "tracecase_invariants", "tracecase_analyzers",
+        "tracecase_compare", "tracecase_policy", "tracecase_lab",
+        "tracecase_coverage", "tracecase_compat", "tracecase_pathforge",
+        "tracecase_cli",
+    },
+    ROOT / "packages" / "tracecase-pathforge" / "src": {
+        "django", "rest_framework", "celery", "opentelemetry", "tracecase_cli",
     },
 }
 

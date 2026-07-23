@@ -329,3 +329,11 @@ pre { max-height: 380px; overflow: auto; padding: 10px; border-radius: 8px; back
   .table-row.header { display: none; }
   .finding-row { grid-template-columns: 1fr; }
 }
+
+.coverage-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem; }
+.coverage-track { height:10px; border-radius:999px; background:var(--panel-muted); overflow:hidden; margin:.75rem 0; }
+.coverage-track > span { display:block; height:100%; background:var(--accent); }
+.compact-list { display:grid; gap:.45rem; }
+.compact-list > div { display:flex; align-items:center; justify-content:space-between; gap:.75rem; padding:.5rem 0; border-bottom:1px solid var(--border); }
+.compact-list > div:last-child { border-bottom:0; }
+.chip-list { display:flex; flex-wrap:wrap; gap:.45rem; margin:.75rem 0 1rem; }

@@ -1,0 +1,13 @@
+{
+  "dimensions": [
+    "family",
+    "universe_axis",
+    "topology",
+    "fault_operator",
+    "invariant",
+    "observability",
+    "interaction",
+    "outcome",
+    "realization"
+  ]
+}

@@ -8,6 +8,9 @@ from pathlib import Path
 from tracecase_analyzers import AnalyzerEngine
 from tracecase_bundle import BundleBuilder, BundleReader
 from tracecase_compare import SemanticComparisonEngine
+from tracecase_compat import BundleHealthScanner, CaseQueryIndex, CompatibilityEngine
+from tracecase_coverage import CoverageEngine
+from tracecase_pathforge import PathforgeTraceBridge, pathforge_bindings
 from tracecase_graph import AssembledExecutionGraph, GraphAssembler
 from tracecase_invariants import InvariantRuntime
 from tracecase_lab import LabRunRequest, ReferenceLab, lab_bindings
@@ -289,6 +292,109 @@ def command_lab_compare(args: argparse.Namespace) -> int:
     print(json.dumps(result.model_dump(mode="json"), indent=2, sort_keys=True))
     return 0
 
+
+def _coverage_instances():
+    registry = build_default_registry()
+    generator = ScenarioGenerator(registry)
+    instances = []
+    for index, family in enumerate(registry.families):
+        definition = ScenarioDefinition(
+            scenario_id=f"scenario.cli.coverage.{index}",
+            title=family.title,
+            family_ref=family.family_id,
+        )
+        instances.append(generator.resolve(definition, seed=1000 + index))
+        if family.allowed_fault_operator_refs:
+            application = FaultApplication(
+                application_id=f"application.cli.coverage.{index}",
+                operator_ref=family.allowed_fault_operator_refs[0],
+                target_kind=FaultTargetKind.SYSTEM,
+            )
+            instances.append(
+                generator.resolve(
+                    definition.model_copy(update={"faults": (application,)}),
+                    seed=2000 + index,
+                )
+            )
+    return registry, tuple(instances)
+
+
+def command_coverage_report() -> int:
+    registry, instances = _coverage_instances()
+    report = CoverageEngine(registry).evaluate(instances)
+    print(json.dumps(report.model_dump(mode="json"), indent=2, sort_keys=True))
+    return 0
+
+
+def command_bundle_compat(path: Path) -> int:
+    reader, temporary = BundleReader.open(path)
+    try:
+        assessment = CompatibilityEngine().assess(reader)
+        print(json.dumps(assessment.model_dump(mode="json"), indent=2, sort_keys=True))
+        return 0 if assessment.status.value in {"compatible", "migratable"} else 2
+    finally:
+        if temporary:
+            temporary.cleanup()
+
+
+def command_bundle_health(path: Path) -> int:
+    reader, temporary = BundleReader.open(path)
+    try:
+        report = BundleHealthScanner().scan(reader)
+        print(json.dumps(report.model_dump(mode="json"), indent=2, sort_keys=True))
+        return 0 if report.valid else 2
+    finally:
+        if temporary:
+            temporary.cleanup()
+
+
+def command_neighborhood(path: Path, node_ref: str, depth: int) -> int:
+    reader, temporary = BundleReader.open(path)
+    try:
+        case = reader.load_case()
+        graph = (
+            AssembledExecutionGraph.model_validate(reader.read_json("analysis/assembled_graph.json"))
+            if reader.has_artifact("analysis/assembled_graph.json")
+            else GraphAssembler().assemble(case.evidence.execution)
+        )
+        index = CaseQueryIndex(case, graph)
+        result = index.neighborhood(node_ref, depth=depth)
+        print(json.dumps(result.model_dump(mode="json"), indent=2, sort_keys=True))
+        return 0
+    finally:
+        if temporary:
+            temporary.cleanup()
+
+
+def command_pathforge_bindings() -> int:
+    print(json.dumps([item.model_dump(mode="json") for item in pathforge_bindings()], indent=2, sort_keys=True))
+    return 0
+
+
+def command_pathforge_run(args: argparse.Namespace) -> int:
+    bridge = PathforgeTraceBridge(args.binding)
+    case = bridge.demo_case(seed=args.seed, fault=args.fault)
+    graph = GraphAssembler().assemble(case.evidence.execution)
+    analysis = AnalyzerEngine().analyze(case, graph)
+    payload = {
+        "result": bridge.analyze(case).model_dump(mode="json"),
+        "analysis": analysis.model_dump(mode="json"),
+    }
+    if args.output:
+        builder = BundleBuilder(args.output)
+        builder.build(case, overwrite=True, analysis_status="complete")
+        if args.archive:
+            builder.pack(args.archive, overwrite=True)
+    print(json.dumps(payload, indent=2, sort_keys=True))
+    return 0
+
+
+def command_pathforge_compare(args: argparse.Namespace) -> int:
+    bridge = PathforgeTraceBridge(args.binding)
+    _baseline, _candidate, comparison = bridge.compare_demo(seed=args.seed, fault=args.fault)
+    print(json.dumps(comparison.model_dump(mode="json"), indent=2, sort_keys=True))
+    return 0
+
 def _parse_assignments(values: list[str] | None) -> dict[str, object]:
     result: dict[str, object] = {}
     for item in values or []:
@@ -385,6 +491,27 @@ def build_parser() -> argparse.ArgumentParser:
         if command == "lab-run":
             lab_parser.add_argument("--output", type=Path)
             lab_parser.add_argument("--archive", type=Path)
+
+    subparsers.add_parser("coverage-report", help="Build the semantic coverage ledger")
+
+    compat_parser = subparsers.add_parser("bundle-compat", help="Assess bundle compatibility")
+    compat_parser.add_argument("path", type=Path)
+    health_parser = subparsers.add_parser("bundle-health", help="Scan bundle integrity and recoverability")
+    health_parser.add_argument("path", type=Path)
+    neighborhood_parser = subparsers.add_parser("neighborhood", help="Query a bounded graph neighborhood")
+    neighborhood_parser.add_argument("path", type=Path)
+    neighborhood_parser.add_argument("node_ref")
+    neighborhood_parser.add_argument("--depth", type=int, default=1)
+
+    subparsers.add_parser("pathforge-bindings", help="List Pathforge integration bindings")
+    for command in ("pathforge-run", "pathforge-compare"):
+        pathforge_parser = subparsers.add_parser(command, help="Run the isolated Pathforge integration")
+        pathforge_parser.add_argument("--binding", default="pathforge.requirement-audit.v1")
+        pathforge_parser.add_argument("--seed", type=int, default=1)
+        pathforge_parser.add_argument("--fault", default="tenant-loss" if command == "pathforge-compare" else None)
+        if command == "pathforge-run":
+            pathforge_parser.add_argument("--output", type=Path)
+            pathforge_parser.add_argument("--archive", type=Path)
     return parser
 
 
@@ -425,6 +552,20 @@ def main(argv: list[str] | None = None) -> int:
         return command_lab_run(args)
     if args.command == "lab-compare":
         return command_lab_compare(args)
+    if args.command == "coverage-report":
+        return command_coverage_report()
+    if args.command == "bundle-compat":
+        return command_bundle_compat(args.path)
+    if args.command == "bundle-health":
+        return command_bundle_health(args.path)
+    if args.command == "neighborhood":
+        return command_neighborhood(args.path, args.node_ref, args.depth)
+    if args.command == "pathforge-bindings":
+        return command_pathforge_bindings()
+    if args.command == "pathforge-run":
+        return command_pathforge_run(args)
+    if args.command == "pathforge-compare":
+        return command_pathforge_compare(args)
     raise AssertionError(f"unknown command: {args.command}")
 
 

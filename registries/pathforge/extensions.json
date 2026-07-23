@@ -1,0 +1,6 @@
+{
+  "namespace": "pathforge.academic",
+  "version": "1.0.0",
+  "entities": ["engagement", "institution", "audit_run", "catalog_version", "reconciliation_run"],
+  "core_override_allowed": false
+}

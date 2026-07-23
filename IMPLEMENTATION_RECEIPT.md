@@ -1,184 +1,189 @@
-# Milestone D implementation receipt
+# Milestone E implementation receipt
 
 ## Delivery contract
 
-This milestone is delivered as a repository-relative delta over the validated Milestone C repository. The archive contains only added or modified files in their original paths. `DELTA_MANIFEST.json` records additions, modifications, deletions, sizes, and SHA-256 hashes.
+Milestone E is delivered as a repository-relative delta over the validated Milestone D repository. The archive contains only added, modified, or explicitly deleted files in their original paths. `DELTA_MANIFEST.json` records the exact operation, size, and SHA-256 digest for every payload path.
 
 ## Roadmap scope
 
-Milestone D implements Phases 12–13:
+Milestone E implements Phases 14–17:
 
-1. Privacy classification, redaction, validation, and shareable export.
-2. Concrete distributed reference laboratory with generic fault bindings and live Workbench controls.
+1. Semantic coverage, mutation adequacy, recommendations, and counterexample minimization.
+2. Compatibility, migrations, archive safety, progressive access, recovery, and large-case indexes.
+3. Public SDK, plugin contracts, CLI, registries, and extension-author documentation.
+4. Isolated Pathforge instrumentation, semantic extensions, portable cases, API, CLI, and Workbench integration.
 
 ## Added packages
 
-### `tracecase-policy`
+### `tracecase-coverage`
 
-Provides:
+- derives expected points from the versioned scenario registry;
+- records witnesses across families, axes, topology, faults, invariants, observability, interactions, outcomes, and realizations;
+- distinguishes covered, uncovered, invalid, and unsupported points;
+- prioritizes next-most-informative scenario families;
+- evaluates mutation adequacy;
+- performs deterministic scenario delta-debugging through a caller-supplied preservation oracle.
 
-- three export profiles;
-- ordered, schema-aware policy rules;
-- field inventory and sensitivity accounting;
-- deterministic tokenization, digesting, masking, truncation, removal, summarization, and rejection;
-- referential-integrity preservation;
-- prohibited-pattern scanning;
-- export-validation reports;
-- privacy-aware portable bundle export.
+The seeded coverage fixture contains 108 valid points:
 
-The shareable exporter does not copy source derived artifacts. It sanitizes canonical evidence, rebuilds graph/timeline/invariants/findings, copies only allowlisted supplements, and writes policy and validation artifacts into the integrity-covered derivative bundle.
+- 83 covered;
+- 25 uncovered;
+- 0 invalid;
+- 0 unsupported.
 
-### `tracecase-lab`
+It produces four prioritized family recommendations. The mutation suite detects both seeded semantic mutations for a score of 1.0. The minimizer removes one irrelevant parameter and one irrelevant fault, reducing the witness by 66.7% while preserving the required-context violation.
 
-Provides:
+### `tracecase-compat`
 
-- generic `LabBinding` contracts;
-- deterministic `LabRunRequest`, events, receipts, run results, and comparison results;
-- an in-process reference workflow;
-- fault-to-lifecycle bindings;
-- automatic graph assembly, timeline generation, invariant evaluation, bounded analysis, and semantic comparison.
+- format-support assessment;
+- explicit migration plans;
+- lossless legacy manifest normalization;
+- bundle integrity and JSONL health reports;
+- recoverability classification;
+- graph query indexes;
+- bounded graph neighborhoods;
+- component, operation, identity, and logical-effect indexes.
 
-The reference binding is academic in presentation but generic in execution semantics. Downstream packages receive ordinary canonical cases and do not import lab-specific types.
+The bundle layer additionally enforces configurable archive limits and supports bounded JSONL paging.
 
-## Distributed reference application
+### `tracecase-sdk`
 
-`apps/reference-lab` adds a Dockerized Django/Celery/PostgreSQL/Redis/mock-SIS workflow with:
+- `SDKContext` and `SDKEvent` contracts;
+- `TracecaseSDK` context binding;
+- nested operation recording;
+- error recording;
+- domain events and logical effects;
+- in-memory and JSONL sinks;
+- adapter/analyzer plugin protocols;
+- versioned plugin registry.
 
-- transcript-import API;
-- import and enrollment persistence;
-- transaction-safe healthy publication using `transaction.on_commit`;
-- Celery normalization and retry behavior;
-- mock external extraction service;
-- shared JSONL evidence sink;
-- controlled generic fault headers;
-- dedicated non-production deployment configuration.
+The SDK depends only on `tracecase-model`.
 
-## Privacy behavior validated
+### `tracecase-pathforge`
 
-The privacy-capture case contains deliberately injected credentials, student identifiers, free text, and transcript-like content.
+- Pathforge workflow and run contexts;
+- requirement-audit and reconciliation bindings;
+- `pathforge.academic` namespaced extensions;
+- portable demonstration cases;
+- generic graph/invariant/analyzer execution;
+- semantic baseline/candidate comparison;
+- URL-addressable case/node/finding deep links.
 
-Under `policy.shareable.v1` its inventory contains 1,029 traversed fields:
-
-- 953 retained;
-- 62 selected for tokenization;
-- 11 selected for summarization;
-- 3 selected for removal.
-
-The deterministic transformation report records 63 actual transformations:
-
-- 52 tokenizations;
-- 8 summaries;
-- 3 removals.
-
-The resulting case has zero policy violations, passes prohibited-pattern validation, preserves canonical references, carries the `shareable` bundle profile, and verifies in both directory and ZIP form.
-
-## Reference-lab behavior validated
-
-The healthy workflow contains 10 source events, 10 canonical nodes, two durable effects, 12 satisfied invariants, one not-applicable invariant, and zero findings.
-
-Generic fault bindings produce the expected bounded outcomes:
-
-- context loss → required-continuity violation;
-- duplicate effect → at-most-once violation and duplicate durable-effect finding;
-- publish before commit → read-after-visibility violation;
-- stale state → freshness violation;
-- schema skew → compatibility violation;
-- prohibited capture → privacy violation;
-- broken link → observability-linkage violation while preserving the underlying effects.
-
-The context comparison aligns all 10 operations without ambiguity and selects the worker normalization boundary at 205 ms as the first consequential divergence, where `tenant_id` changes from the institution token to absent.
+The core Tracecase packages do not import the Pathforge package.
 
 ## Workbench additions
 
-### Redact & Export
+### Coverage Observatory
 
-- case and policy selection;
-- field classification inventory;
-- action and sensitivity summaries;
-- deterministic transformation preview;
-- unresolved violation display;
-- shareable export request;
-- export-path and validation results.
+- coverage metrics;
+- per-dimension completion tracks;
+- covered/uncovered point inspection;
+- next-most-informative recommendations.
 
-### Live Lab
+### Compatibility & Health Center
 
-- concrete binding and fault selection;
-- seed and tenant/principal controls;
-- baseline, candidate, and comparison execution;
-- persistence to portable bundles;
-- graph, timeline, semantics, invariant, and finding views;
-- first-divergence presentation.
+- case selection;
+- format-support result;
+- integrity and recoverability result;
+- extension namespaces;
+- stream record counts;
+- recommended recovery actions.
+
+### Pathforge Integration
+
+- binding selection;
+- baseline execution;
+- tenant-loss comparison;
+- generic-invariant display;
+- domain-event display;
+- first meaningful divergence;
+- generated Workbench deep link.
 
 ## API additions
 
-- `GET /api/privacy-policies`
-- `POST /api/cases/{case_id}/privacy-inventory`
-- `POST /api/cases/{case_id}/redaction-preview`
-- `POST /api/cases/{case_id}/shareable-export`
-- `GET /api/lab-bindings`
-- `POST /api/lab-runs`
-- `POST /api/lab-comparisons`
-- `POST /api/lab-runs/persist`
+- `GET /api/coverage`
+- `GET /api/cases/{case_id}/health`
+- `GET /api/cases/{case_id}/neighborhood`
+- `GET /api/pathforge-bindings`
+- `POST /api/pathforge-runs`
+- `POST /api/pathforge-comparisons`
 
 ## CLI additions
 
-- `policy-list`
-- `privacy-inventory`
-- `redaction-preview`
-- `export-shareable`
-- `lab-bindings`
-- `lab-run`
-- `lab-compare`
+- `coverage-report`
+- `bundle-compat`
+- `bundle-health`
+- `neighborhood`
+- `pathforge-bindings`
+- `pathforge-run`
+- `pathforge-compare`
 
-## Portable Milestone D fixtures
+## Portable Milestone E fixtures
 
-- `reference-lab-baseline.tracecase`
-- `reference-lab-context-loss.tracecase`
-- `reference-lab-duplicate-effect.tracecase`
-- `reference-lab-publish-before-commit.tracecase`
-- `reference-lab-privacy-capture.tracecase`
-- `reference-lab-observability-gap.tracecase`
-- `reference-lab-context-comparison.tracecase`
-- `reference-lab-shareable.tracecase`
+- `pathforge-audit-baseline.tracecase`
+- `pathforge-audit-context-loss.tracecase`
+- `pathforge-audit-comparison.tracecase`
+- `tracecase-coverage-and-health.tracecase`
 
-Each has an equivalent ZIP transport archive. Lab bundles contain source events, run receipts, graph/timeline artifacts, invariant reports, analyzer findings, and derived semantic projections. The comparison bundle additionally contains alignments and divergences. The shareable bundle contains redaction policy, report, export validation, and recomputed sanitized analysis.
+Each has a ZIP transport archive. The coverage/health case includes the coverage ledger, minimized definition, minimization report, mutation-adequacy report, compatibility assessment, health report, and query-index summary.
+
+## Validated behavior
+
+### Coverage
+
+- 108 valid semantic points derived;
+- 83 points witnessed;
+- 25 valid points left explicitly uncovered;
+- four prioritized recommendations;
+- two of two seeded mutations detected;
+- 66.7% witness-input reduction with preservation.
+
+### Compatibility and health
+
+The Pathforge baseline is read as bundle format `1.0.0`, classified compatible, verifies successfully, has readable indexed JSONL streams, is classified recoverable, and preserves the `pathforge.academic` extension namespace.
+
+### Pathforge
+
+The baseline requirement audit contains five aligned operations and produces no findings. The tenant-loss candidate remains structurally alignable with:
+
+- five aligned nodes;
+- zero baseline-only nodes;
+- zero candidate-only nodes;
+- zero ambiguous alignments;
+- six consequential identity/context divergences.
+
+The first meaningful divergence is the missing tenant identity at `audit.solver.completed`, 90 ms into the execution.
 
 ## Validation result
 
-The final working repository passed:
+The completed all-in-one validation run passed:
 
 ```text
 Architecture dependency checks passed.
-46 tests passed.
-18 directory-form bundles verified.
-8 Milestone D ZIP bundles opened and verified.
-Invariant, analyzer, and semantic comparison CLI smoke tests passed.
-Policy inventory, redaction preview, and shareable export CLI smoke tests passed.
-Reference-lab binding, execution, and comparison CLI smoke tests passed.
-Temporary shareable directory and ZIP exports verified.
+57 tests passed.
+22 directory-form bundles verified.
+22 ZIP transport bundles reopened and verified.
+16 CLI smoke workflows passed, including coverage, compatibility, health,
+neighborhood queries, privacy export, the reference laboratory, and Pathforge.
 Python compilation passed.
 Workbench TypeScript/TSX syntax transpilation passed for 4 source files.
+Milestone E validation passed.
 ```
 
-The complete local Vite production build was not run because the npm dependency tree is unavailable in the execution container. CI performs `npm install` and `npm run build` in a network-enabled environment.
+The validation harness performs bulk bundle verification and CLI smoke execution within shared Python processes, so the entire suite completed in approximately nine seconds in the delivery environment.
 
-The distributed Docker Compose topology was not launched in this container because Docker is unavailable. Its Python source compiled successfully; the deterministic in-process realization, API contracts, generated evidence, invariant outcomes, analysis, comparison, and portable bundles were fully exercised.
+A complete Vite production build was not run locally because the npm dependency tree is unavailable. CI performs `npm install` and `npm run build`.
+
+Django/DRF are not installed in the execution container, so API runtime startup was not performed locally. All API Python source compiled, and the API contracts are exercised indirectly through their underlying package tests and CLI paths.
 
 ## Architectural guarantees
 
-- Source and shareable bundles are separate immutable cases.
-- Redaction preserves canonical references.
-- Unknown supplements are omitted unless explicitly allowlisted safe.
-- Derived artifacts are recomputed from disclosed evidence.
-- Policy, transformation, omission, validation, and integrity results remain auditable.
-- Generic fault identities are independent of Django and Celery implementation details.
-- The reference lab uses ordinary canonical cases, invariant results, findings, and comparisons.
-- Observability faults do not alter the modeled ground-truth effects.
-- Fault injection remains isolated from production deployment paths.
-
-## Deferred to later milestones
-
-- Coverage observatory and automatic counterexample minimization.
-- Large-case streaming, migrations, and compatibility hardening.
-- Full OSS packaging and extension-author onboarding.
-- Pathforge-specific instrumentation and semantic extensions.
+- Coverage claims remain bounded to a declared registry version.
+- Invalid Cartesian combinations are not mislabeled as uncovered.
+- Minimization logic is independent of particular invariants and domains.
+- Compatibility never silently drops namespaced extensions.
+- Archive extraction has explicit resource and traversal limits.
+- The SDK has no framework dependency.
+- Pathforge remains an edge integration.
+- Pathforge domain semantics cannot override canonical core fields.
+- Generic graph, invariant, analyzer, comparison, privacy, and bundle systems remain reusable without Pathforge.

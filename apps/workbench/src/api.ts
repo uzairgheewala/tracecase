@@ -14,6 +14,11 @@ import type {
   LabRunResult,
   LabComparisonResult,
   TimelineModel,
+  CoverageLedger,
+  BundleHealthResponse,
+  PathforgeBinding,
+  PathforgeRunPayload,
+  PathforgeComparisonPayload,
 } from "./types";
 
 const API_BASE = import.meta.env.VITE_TRACECASE_API_BASE ?? "http://localhost:8000/api";
@@ -117,4 +122,26 @@ export function compareLab(payload: Record<string, unknown>): Promise<LabCompari
 
 export function persistLab(payload: Record<string, unknown>): Promise<Record<string, unknown>> {
   return request<Record<string, unknown>>("/lab-runs/persist", { method: "POST", body: JSON.stringify(payload) });
+}
+
+
+export function getCoverageReport(): Promise<CoverageLedger> {
+  return request<CoverageLedger>("/coverage");
+}
+
+export function getBundleHealth(caseId: string): Promise<BundleHealthResponse> {
+  return request<BundleHealthResponse>(`/cases/${encodeURIComponent(caseId)}/health`);
+}
+
+export async function listPathforgeBindings(): Promise<PathforgeBinding[]> {
+  const payload = await request<{ items: PathforgeBinding[] }>("/pathforge-bindings");
+  return payload.items;
+}
+
+export function runPathforge(payload: Record<string, unknown>): Promise<PathforgeRunPayload> {
+  return request<PathforgeRunPayload>("/pathforge-runs", { method: "POST", body: JSON.stringify(payload) });
+}
+
+export function comparePathforge(payload: Record<string, unknown>): Promise<PathforgeComparisonPayload> {
+  return request<PathforgeComparisonPayload>("/pathforge-comparisons", { method: "POST", body: JSON.stringify(payload) });
 }

@@ -1,6 +1,6 @@
 [project]
 name = "tracecase-workspace"
-version = "0.4.0"
+version = "0.5.0"
 requires-python = ">=3.11"
 dependencies = [
   "pydantic>=2.8,<3",
@@ -27,6 +27,10 @@ pythonpath = [
   "packages/tracecase-compare/src",
   "packages/tracecase-policy/src",
   "packages/tracecase-lab/src",
+  "packages/tracecase-coverage/src",
+  "packages/tracecase-compat/src",
+  "packages/tracecase-sdk/src",
+  "packages/tracecase-pathforge/src",
 ]
 addopts = "-ra"
 
@@ -54,4 +58,8 @@ mypy_path = [
   "packages/tracecase-compare/src",
   "packages/tracecase-policy/src",
   "packages/tracecase-lab/src",
+  "packages/tracecase-coverage/src",
+  "packages/tracecase-compat/src",
+  "packages/tracecase-sdk/src",
+  "packages/tracecase-pathforge/src",
 ]

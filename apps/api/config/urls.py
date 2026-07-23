@@ -3,7 +3,7 @@ from django.http import JsonResponse
 
 
 def health(_request):
-    return JsonResponse({"status": "ok", "service": "tracecase-api", "milestone": "D"})
+    return JsonResponse({"status": "ok", "service": "tracecase-api", "milestone": "E"})
 
 
 urlpatterns = [
@@ -13,4 +13,7 @@ urlpatterns = [
     path("api/", include("comparisons.urls")),
     path("api/", include("privacy.urls")),
     path("api/", include("lab.urls")),
+    path("api/", include("coveragecenter.urls")),
+    path("api/", include("healthcenter.urls")),
+    path("api/", include("pathforge.urls")),
 ]

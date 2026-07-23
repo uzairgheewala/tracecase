@@ -17,6 +17,9 @@ INSTALLED_APPS = [
     "comparisons",
     "privacy",
     "lab",
+    "coveragecenter",
+    "healthcenter",
+    "pathforge",
 ]
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",

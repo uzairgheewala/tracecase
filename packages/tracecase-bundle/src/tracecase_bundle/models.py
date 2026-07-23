@@ -16,6 +16,8 @@ class BundleProfile(StrEnum):
     REPRODUCIBLE = "reproducible"
     SYNTHETIC_BENCHMARK = "synthetic_benchmark"
     COMPARISON = "comparison"
+    COVERAGE = "coverage"
+    PATHFORGE = "pathforge"
 
 
 class BundleLifecycle(StrEnum):

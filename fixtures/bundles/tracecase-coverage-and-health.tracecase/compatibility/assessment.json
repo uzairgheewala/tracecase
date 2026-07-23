@@ -1,0 +1,1 @@
+{"assessment_id":"compat.bundle.case.pathforge.501.baseline","bundle_ref":"bundle.case.pathforge.501.baseline","extension_namespaces":["pathforge.academic"],"format_version":"1.0.0","issues":[],"recommended_actions":["Preserve unknown namespaced extensions during migration and reserialization."],"status":"compatible","supported_format_versions":["1.0.0"]}

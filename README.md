@@ -1,56 +1,96 @@
-# Tracecase — Milestone D
+# Tracecase — Milestone E
 
-Tracecase is an offline-first distributed-execution forensics toolkit. Milestone D adds privacy-safe disclosure and a concrete distributed reference laboratory above the portable case, graph, invariant, analyzer, and semantic-comparison layers delivered in Milestones A–C.
+Tracecase is an offline-first distributed-execution forensics toolkit. Milestone E completes the initial roadmap by adding semantic coverage and counterexample minimization, bundle compatibility and hardening, public instrumentation/plugin surfaces, and an isolated Pathforge integration.
 
-## Included capabilities
+## Milestone E capabilities
 
-### Privacy classification and export policy
+### Coverage Observatory
 
-- Schema-aware field inventory across canonical cases.
-- Internal, shareable, and public export profiles.
-- Ordered retain, tokenize, digest, mask, truncate, remove, summarize, and reject actions.
-- Stable keyed pseudonyms for equality-preserving correlation.
-- Prohibited-pattern validation and canary-secret tests.
-- Referential-integrity preservation.
-- Redaction and export-validation artifacts inside the resulting bundle.
-- Recomputed graph, timeline, invariants, and findings from sanitized evidence.
+`tracecase-coverage` builds a coverage ledger relative to a versioned scenario universe. It measures:
 
-### Distributed reference laboratory
+- scenario families;
+- semantic-universe axes;
+- topology motifs;
+- fault operators;
+- invariants;
+- observability profiles;
+- valid family/fault/profile interactions;
+- invariant outcomes;
+- synthetic and concrete realizations.
 
-The initial lab binding realizes a browser → Django → PostgreSQL transaction → Celery worker → mock SIS/OCR → enrollment projection → audit → notification workflow.
+The generated fixture currently contains 108 valid points: 83 covered and 25 uncovered. Recommendations identify the next families and configurations with the greatest marginal coverage value.
 
-It supports generic fault operators for:
+The deterministic minimizer accepts an external preservation oracle and records each reduction. The seeded witness reduces from three input elements to one while preserving the required-context violation.
 
-- required-context loss;
-- publish-before-commit ordering;
-- duplicate durable effects;
-- stale state;
-- producer/consumer schema skew;
-- broken observability linkage;
-- prohibited sensitive capture;
-- timeout after effect.
+### Compatibility and hardening
 
-In-process mode is deterministic and drives tests, fixtures, CLI, API, and UI. A Docker Compose deployment provides the concrete Django/PostgreSQL/Redis/Celery realization.
+`tracecase-compat` adds:
+
+- explicit compatible, migratable, incompatible, and unknown results;
+- a seeded lossless `0.9.0 → 1.0.0` manifest migration;
+- integrity and JSONL health scanning;
+- recovery recommendations;
+- namespaced-extension preservation;
+- component, operation, identity, effect, and neighborhood indexes;
+- bounded JSONL paging;
+- ZIP entry-count, size, path, and compression-ratio limits.
+
+### Public SDK and plugin contracts
+
+`tracecase-sdk` provides:
+
+- context propagation through Python `contextvars`;
+- operation start/end and error recording;
+- domain-event and effect recording;
+- in-memory and JSONL event sinks;
+- adapter and analyzer plugin protocols;
+- duplicate-safe plugin registration.
+
+It depends only on the canonical model and is suitable for framework-specific integrations without introducing those frameworks into the core.
+
+### Pathforge integration
+
+`tracecase-pathforge` is an isolated edge package. It contributes:
+
+- requirement-audit and reconciliation bindings;
+- `pathforge.academic` extension schemas;
+- Pathforge workflow/run contexts;
+- domain-event bridging;
+- portable baseline, fault, and comparison cases;
+- URL-addressable Workbench deep links.
+
+The baseline requirement-audit run uses the ordinary generic Tracecase graph, invariant, analyzer, and comparison engines. The tenant-loss comparison aligns all five operations and selects the solver boundary at 90 ms as the first meaningful divergence.
 
 ### Workbench
 
-The React Workbench now provides five investigation surfaces:
+The Workbench now provides eight surfaces:
 
-- **Explore Cases** — graph, timeline, semantics, invariants, findings, and evidence.
-- **Construct Scenarios** — generic scenario generation.
-- **Compare Executions** — semantic alignment and divergence.
-- **Redact & Export** — field inventory, transformation preview, policy validation, and shareable export.
-- **Live Lab** — run a baseline or faulted workflow, compare it, persist it, and inspect the resulting graph and findings.
+- Explore Cases
+- Construct Scenarios
+- Compare Executions
+- Redact & Export
+- Live Lab
+- Coverage Observatory
+- Compatibility & Health Center
+- Pathforge Integration
 
 ## New repository areas
 
-- `packages/tracecase-policy` — classification, deterministic transformation, validation, and shareable export.
-- `packages/tracecase-lab` — generic-to-concrete lab bindings and in-process orchestration.
-- `apps/reference-lab` — distributed Django/Celery/PostgreSQL/Redis/mock-SIS realization.
-- `apps/api/privacy` — policy, inventory, preview, and export endpoints.
-- `apps/api/lab` — binding, execution, comparison, and persistence endpoints.
-- `registries/privacy` and `registries/lab` — exported policy and binding contracts.
-- `fixtures/bundles/reference-lab-*` — internal, comparison, observability, privacy, and shareable portable cases.
+- `packages/tracecase-coverage`
+- `packages/tracecase-compat`
+- `packages/tracecase-sdk`
+- `packages/tracecase-pathforge`
+- `apps/api/coveragecenter`
+- `apps/api/healthcenter`
+- `apps/api/pathforge`
+- `docs/coverage`
+- `docs/compatibility`
+- `docs/sdk`
+- `docs/pathforge`
+- `registries/coverage`
+- `registries/compatibility`
+- `registries/sdk`
+- `registries/pathforge`
 
 ## Validate
 
@@ -58,24 +98,24 @@ The React Workbench now provides five investigation surfaces:
 ./scripts/validate.sh
 ```
 
-Validation regenerates every milestone fixture, checks package boundaries, runs the complete Python suite, verifies directory and ZIP bundles, exercises invariant/analyzer/comparison/privacy/lab CLI commands, creates and verifies a temporary shareable export, compiles Python, and checks the Workbench TypeScript/TSX syntax. CI performs the full Vite production build.
+The suite regenerates Milestones A–E fixtures, enforces package boundaries, runs all Python tests, verifies directory and ZIP bundles, exercises the old and new CLI surfaces, compiles Python, and checks Workbench TypeScript/TSX syntax. CI performs the complete Vite production build.
 
-## CLI examples
+## New CLI examples
 
 ```bash
-python -m tracecase_cli policy-list
-python -m tracecase_cli privacy-inventory \
-  fixtures/bundles/reference-lab-privacy-capture.tracecase
-python -m tracecase_cli redaction-preview \
-  fixtures/bundles/reference-lab-privacy-capture.tracecase
-python -m tracecase_cli export-shareable \
-  fixtures/bundles/reference-lab-privacy-capture.tracecase \
-  /tmp/shareable.tracecase \
-  --archive /tmp/shareable.tracecase.zip
+python -m tracecase_cli coverage-report
 
-python -m tracecase_cli lab-bindings
-python -m tracecase_cli lab-run --seed 42 --fault fault.effect.duplicate.v1
-python -m tracecase_cli lab-compare --seed 42 --fault fault.context.drop.v1
+python -m tracecase_cli bundle-compat \
+  fixtures/bundles/pathforge-audit-baseline.tracecase
+python -m tracecase_cli bundle-health \
+  fixtures/bundles/pathforge-audit-baseline.tracecase
+python -m tracecase_cli neighborhood \
+  fixtures/bundles/pathforge-audit-baseline.tracecase \
+  node.pathforge.request --depth 2
+
+python -m tracecase_cli pathforge-bindings
+python -m tracecase_cli pathforge-run --seed 42
+python -m tracecase_cli pathforge-compare --seed 42 --fault tenant-loss
 ```
 
 ## Run the API and Workbench
@@ -89,11 +129,4 @@ npm install
 npm run dev
 ```
 
-## Run the distributed laboratory
-
-```bash
-cd apps/reference-lab
-docker compose up --build
-```
-
-The `.tracecase` bundle remains the evidence source of truth. Django indexes and serves bundles, while the privacy engine creates a separately identified sanitized derivative rather than mutating the source case.
+The `.tracecase` bundle remains the evidence source of truth. Coverage, compatibility, health, Pathforge, and UI artifacts remain integrity-covered supplements or reproducible projections over frozen evidence.

@@ -34,6 +34,14 @@ class BuildResult:
 
 
 @dataclass(frozen=True)
+class ArchiveLimits:
+    max_entries: int = 100_000
+    max_uncompressed_bytes: int = 2_000_000_000
+    max_member_bytes: int = 500_000_000
+    max_compression_ratio: float = 1_000.0
+
+
+@dataclass(frozen=True)
 class SupplementalArtifact:
     """Opaque, schema-versioned artifact written without coupling bundle code to producers."""
 
@@ -60,6 +68,9 @@ class BundleBuilder:
         "synthetic",
         "collection",
         "registry",
+        "coverage",
+        "compatibility",
+        "pathforge",
     )
     RESERVED_PATHS = {
         "manifest.json",
@@ -82,7 +93,7 @@ class BundleBuilder:
 
     def __init__(self, output_path: Path, *, producer: ProducerDescriptor | None = None) -> None:
         self.output_path = output_path
-        self.producer = producer or ProducerDescriptor(name="tracecase", version="0.4.0")
+        self.producer = producer or ProducerDescriptor(name="tracecase", version="0.5.0")
         self._frozen = False
 
     def build(
@@ -285,14 +296,25 @@ class BundleBuilder:
         return "application/octet-stream"
 
     @staticmethod
-    def unpack(archive_path: Path, destination: Path, *, overwrite: bool = False) -> Path:
+    def unpack(archive_path: Path, destination: Path, *, overwrite: bool = False, limits: ArchiveLimits | None = None) -> Path:
         if destination.exists():
             if not overwrite:
                 raise FileExistsError(destination)
             shutil.rmtree(destination)
         destination.mkdir(parents=True)
+        limits = limits or ArchiveLimits()
         with zipfile.ZipFile(archive_path) as archive:
-            for member in archive.infolist():
+            members = archive.infolist()
+            if len(members) > limits.max_entries:
+                raise ValueError(f"archive contains {len(members)} entries; limit is {limits.max_entries}")
+            total_size = sum(member.file_size for member in members)
+            if total_size > limits.max_uncompressed_bytes:
+                raise ValueError(f"archive uncompressed size {total_size} exceeds limit {limits.max_uncompressed_bytes}")
+            for member in members:
+                if member.file_size > limits.max_member_bytes:
+                    raise ValueError(f"archive member {member.filename} exceeds per-file limit")
+                if member.compress_size and member.file_size / member.compress_size > limits.max_compression_ratio:
+                    raise ValueError(f"archive member {member.filename} exceeds compression-ratio limit")
                 target = (destination / member.filename).resolve()
                 if destination.resolve() not in target.parents and target != destination.resolve():
                     raise ValueError(f"unsafe archive path: {member.filename}")

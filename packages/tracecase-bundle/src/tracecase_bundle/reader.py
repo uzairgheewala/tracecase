@@ -81,6 +81,22 @@ class BundleReader:
                     except json.JSONDecodeError as exc:
                         raise ValueError(f"invalid JSONL at {relative_path}:{line_number}") from exc
 
+
+    def read_jsonl_page(self, relative_path: str, *, offset: int = 0, limit: int = 100) -> tuple[Any, ...]:
+        if offset < 0 or limit < 1:
+            raise ValueError("offset must be non-negative and limit must be positive")
+        values: list[Any] = []
+        for index, value in enumerate(self.read_jsonl(relative_path)):
+            if index < offset:
+                continue
+            values.append(value)
+            if len(values) >= limit:
+                break
+        return tuple(values)
+
+    def content_entries(self, *, layer: str | None = None) -> tuple[ContentEntry, ...]:
+        return tuple(entry for entry in self.content_index.entries if layer is None or entry.layer == layer)
+
     def load_case(self) -> ExecutionCase:
         specification = CaseSpecification.model_validate(self.read_json(self.manifest.case_ref))
         system = SystemModel.model_validate(self.read_json("specification/system_snapshot.json"))

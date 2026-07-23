@@ -1,0 +1,1 @@
+{"evidence_classification":"recorded","execution_id":"execution.pathforge.502.baseline","extensions":{"pathforge.academic":{"binding_ref":"pathforge.requirement-audit.v1","catalog_version":"2026.1","expected_effects":[{"logical_effect_key":"audit-result/502","required":true}]}}}

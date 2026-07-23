@@ -1,0 +1,1 @@
+{"attributes":{},"expected_invariants":[],"extensions":{},"family_ref":"continuity.context_disappearance.v1","faults":[{"application_id":"essential","operator_ref":"fault.context.drop.v1","parameters":{},"target_kind":"system"}],"observability_profile":"complete","parameter_bindings":{},"scenario_id":"scenario.coverage.minimize","title":"Coverage minimization witness"}

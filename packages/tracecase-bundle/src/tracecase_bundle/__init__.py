@@ -1,4 +1,4 @@
-from .builder import BundleBuilder, BuildResult, SupplementalArtifact
+from .builder import ArchiveLimits, BundleBuilder, BuildResult, SupplementalArtifact
 from .canonical import canonical_json_bytes, canonical_json_text, digest_bytes, digest_file
 from .models import (
     BundleLifecycle,
@@ -17,6 +17,7 @@ from .models import (
 from .reader import BundleReader, VerificationResult
 
 __all__ = [
+    "ArchiveLimits",
     "BuildResult",
     "BundleBuilder",
     "BundleLifecycle",

@@ -19,6 +19,11 @@ import {
   runLab,
   compareLab,
   persistLab,
+  getCoverageReport,
+  getBundleHealth,
+  listPathforgeBindings,
+  runPathforge,
+  comparePathforge,
 } from "./api";
 import type {
   AnalysisReport,
@@ -40,9 +45,14 @@ import type {
   LabBinding,
   LabRunResult,
   LabComparisonResult,
+  CoverageLedger,
+  BundleHealthResponse,
+  PathforgeBinding,
+  PathforgeRunPayload,
+  PathforgeComparisonPayload,
 } from "./types";
 
-type WorkspaceMode = "explore" | "construct" | "compare" | "privacy" | "lab";
+type WorkspaceMode = "explore" | "construct" | "compare" | "privacy" | "lab" | "coverage" | "health" | "pathforge";
 type VisualMode = "graph" | "timeline" | "semantics";
 
 function Metric({ label, value, detail }: { label: string; value: number | string; detail?: string }) {
@@ -729,6 +739,27 @@ function LiveLab({
   );
 }
 
+
+function CoverageObservatory({ report, running, onRefresh }: { report?: CoverageLedger; running: boolean; onRefresh: () => void }) {
+  if (!report) return <div className="empty-state"><strong>Build the semantic coverage ledger</strong><span>Coverage is measured against declared families, universes, faults, invariants, observability profiles, and valid interactions.</span><button type="button" className="primary-button" disabled={running} onClick={onRefresh}>Generate coverage</button></div>;
+  const dimensions = Array.from(new Set(report.points.map((item) => item.dimension)));
+  return <div className="stack">
+    <section className="section-heading"><div><span className="eyebrow">Coverage Observatory</span><h2>Bounded semantic-universe coverage</h2><p>Uncovered means valid but not yet witnessed; it does not imply unsupported semantics.</p></div><button type="button" onClick={onRefresh} disabled={running}>Refresh</button></section>
+    <div className="metric-grid"><Metric label="Covered" value={report.summary.covered ?? 0}/><Metric label="Uncovered" value={report.summary.uncovered ?? 0}/><Metric label="Total points" value={report.summary.total ?? report.points.length}/><Metric label="Instances" value={Number(report.attributes.instance_count ?? 0)}/></div>
+    <section className="coverage-grid">{dimensions.map((dimension) => { const points=report.points.filter((item)=>item.dimension===dimension); const covered=points.filter((item)=>item.status==="covered").length; return <div className="data-panel" key={dimension}><div className="section-heading"><h3>{dimension.replaceAll("_"," ")}</h3><Badge tone={covered===points.length?"good":"warning"}>{covered}/{points.length}</Badge></div><div className="coverage-track"><span style={{width:`${points.length ? covered/points.length*100 : 0}%`}} /></div><div className="compact-list">{points.slice(0,8).map((item)=><div key={item.point_id}><Badge tone={item.status==="covered"?"good":"warning"}>{item.status}</Badge><span>{item.key}</span></div>)}</div></div>; })}</section>
+    <section className="data-panel"><div className="section-heading"><h3>Next most informative families</h3><Badge>{report.recommendations.length}</Badge></div>{report.recommendations.slice(0,8).map((item)=><div className="finding-row" key={item.recommendation_id}><Badge tone="accent">#{item.priority}</Badge><strong>{item.family_ref}</strong><span>{item.rationale}</span></div>)}</section>
+  </div>;
+}
+
+function HealthCenter({ cases, activeCaseId, onCase, report, running, onScan }: { cases: CaseSummary[]; activeCaseId?: string; onCase:(id:string)=>void; report?:BundleHealthResponse; running:boolean; onScan:()=>void }) {
+  return <div className="stack"><section className="section-heading"><div><span className="eyebrow">Compatibility & Health Center</span><h2>Bundle evolution and recoverability</h2><p>Assess format support, integrity, extension preservation, JSONL readability, and safe recovery actions.</p></div></section><div className="control-grid"><label>Case bundle<select value={activeCaseId ?? ""} onChange={(event)=>onCase(event.target.value)}>{cases.map((item)=><option key={item.case_id} value={item.case_id}>{item.title}</option>)}</select></label><button type="button" className="primary-button" disabled={running || !activeCaseId} onClick={onScan}>Scan bundle</button></div>{report ? <><div className="metric-grid"><Metric label="Compatibility" value={report.compatibility.status}/><Metric label="Format" value={report.compatibility.format_version}/><Metric label="Integrity" value={report.health.valid?"Valid":"Review"}/><Metric label="Recoverable" value={report.health.recoverable?"Yes":"No"}/></div><section className="data-panel"><h3>Extension namespaces</h3><div className="chip-list">{report.compatibility.extension_namespaces.map((item)=><Badge key={item}>{item}</Badge>)}</div>{report.compatibility.recommended_actions.map((item)=><div className="inspection-point" key={item}>{item}</div>)}</section><section className="data-panel"><h3>Indexed record counts</h3><div className="compact-list">{Object.entries(report.health.record_counts).map(([path,count])=><div key={path}><span>{path}</span><strong>{count}</strong></div>)}</div>{report.health.recommendations.map((item)=><div className="limitation" key={item}>{item}</div>)}</section></> : <div className="empty-state"><strong>No health report yet</strong><span>Select a case and run a compatibility and integrity scan.</span></div>}</div>;
+}
+
+function PathforgeStudio({ bindings, bindingId, onBinding, running, runResult, comparison, onRun, onCompare }: { bindings:PathforgeBinding[]; bindingId?:string; onBinding:(id:string)=>void; running:boolean; runResult?:PathforgeRunPayload; comparison?:PathforgeComparisonPayload; onRun:()=>void; onCompare:()=>void }) {
+  const binding=bindings.find((item)=>item.binding_id===bindingId); const first=comparison?.comparison.divergences.find((item)=>item.divergence_id===comparison.comparison.first_meaningful_divergence_ref);
+  return <div className="stack"><section className="section-heading"><div><span className="eyebrow">Pathforge integration</span><h2>{binding?.title ?? "Domain bridge"}</h2><p>Pathforge emits namespaced academic semantics while generic Tracecase graph, invariant, analyzer, and comparison engines remain unchanged.</p></div><Badge tone="accent">{binding?.extension_namespace ?? "pathforge.academic"}</Badge></section><div className="control-grid"><label>Binding<select value={bindingId ?? ""} onChange={(event)=>onBinding(event.target.value)}>{bindings.map((item)=><option key={item.binding_id} value={item.binding_id}>{item.title}</option>)}</select></label></div><div className="button-row"><button type="button" className="primary-button" disabled={running || !bindingId} onClick={onRun}>Run baseline</button><button type="button" disabled={running || !bindingId} onClick={onCompare}>Compare tenant-loss fault</button></div>{runResult ? <><div className="metric-grid"><Metric label="Case" value={runResult.result.case_id}/><Metric label="Findings" value={runResult.result.finding_count}/><Metric label="Nodes" value={Number(runResult.result.attributes.node_count ?? 0)}/><Metric label="Deep link" value="Ready"/></div><div className="callout"><strong>Pathforge deep link</strong><span>{runResult.result.deep_link}</span></div></> : null}{comparison ? <><div className="metric-grid"><Metric label="Aligned" value={comparison.comparison.summary.aligned_nodes}/><Metric label="Divergences" value={comparison.comparison.summary.divergence_count}/><Metric label="Consequential" value={comparison.comparison.summary.consequential_divergence_count}/></div>{first ? <div className="callout"><strong>First meaningful divergence</strong><span>{first.summary}</span></div> : null}</> : null}<section className="data-panel"><h3>Generic invariants</h3><div className="chip-list">{binding?.generic_invariants.map((item)=><Badge key={item}>{item}</Badge>)}</div><h3>Domain events</h3><div className="compact-list">{binding?.domain_event_types.map((item)=><div key={item}><span>{item}</span></div>)}</div></section></div>;
+}
+
 export function App() {
   const [mode, setMode] = useState<WorkspaceMode>("explore");
   const [cases, setCases] = useState<CaseSummary[]>([]);
@@ -758,16 +789,22 @@ export function App() {
   const [labFault, setLabFault] = useState<string>();
   const [labRun, setLabRun] = useState<LabRunResult>();
   const [labComparison, setLabComparison] = useState<LabComparisonResult>();
+  const [coverage, setCoverage] = useState<CoverageLedger>();
+  const [healthReport, setHealthReport] = useState<BundleHealthResponse>();
+  const [pathforgeBindings, setPathforgeBindings] = useState<PathforgeBinding[]>([]);
+  const [activePathforgeBindingId, setActivePathforgeBindingId] = useState<string>();
+  const [pathforgeRun, setPathforgeRun] = useState<PathforgeRunPayload>();
+  const [pathforgeComparison, setPathforgeComparison] = useState<PathforgeComparisonPayload>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
 
   useEffect(() => {
-    Promise.all([listCases(), listScenarioFamilies(), listPrivacyPolicies(), listLabBindings()])
-      .then(([caseItems, familyItems, policyItems, bindingItems]) => {
-        setCases(caseItems); setFamilies(familyItems); setPolicies(policyItems); setLabBindings(bindingItems);
+    Promise.all([listCases(), listScenarioFamilies(), listPrivacyPolicies(), listLabBindings(), listPathforgeBindings()])
+      .then(([caseItems, familyItems, policyItems, bindingItems, pathforgeItems]) => {
+        setCases(caseItems); setFamilies(familyItems); setPolicies(policyItems); setLabBindings(bindingItems); setPathforgeBindings(pathforgeItems);
         setActiveCaseId(caseItems[0]?.case_id); setActiveFamilyId(familyItems[0]?.family_id);
         setActivePolicyId(policyItems.find((item) => item.profile === "shareable")?.policy_id ?? policyItems[0]?.policy_id);
-        setActiveBindingId(bindingItems[0]?.binding_id);
+        setActiveBindingId(bindingItems[0]?.binding_id); setActivePathforgeBindingId(pathforgeItems[0]?.binding_id);
         const baseline = caseItems.find((item) => item.title.toLowerCase().includes("baseline")) ?? caseItems[0];
         const candidate = caseItems.find((item) => item.title.toLowerCase().includes("failure")) ?? caseItems[1] ?? caseItems[0];
         setBaselineCaseId(baseline?.case_id); setCandidateCaseId(candidate?.case_id);
@@ -806,13 +843,16 @@ export function App() {
   return (
     <main className="app-shell">
       <header className="topbar">
-        <div><span className="eyebrow">Milestone D</span><h1>Tracecase Workbench</h1></div>
+        <div><span className="eyebrow">Milestone E</span><h1>Tracecase Workbench</h1></div>
         <div className="mode-switcher">
           <button type="button" className={mode === "explore" ? "active" : ""} onClick={() => setMode("explore")}>Explore</button>
           <button type="button" className={mode === "construct" ? "active" : ""} onClick={() => setMode("construct")}>Construct</button>
           <button type="button" className={mode === "compare" ? "active" : ""} onClick={() => setMode("compare")}>Compare</button>
           <button type="button" className={mode === "privacy" ? "active" : ""} onClick={() => setMode("privacy")}>Redact & export</button>
           <button type="button" className={mode === "lab" ? "active" : ""} onClick={() => setMode("lab")}>Live lab</button>
+          <button type="button" className={mode === "coverage" ? "active" : ""} onClick={() => setMode("coverage")}>Coverage</button>
+          <button type="button" className={mode === "health" ? "active" : ""} onClick={() => setMode("health")}>Health</button>
+          <button type="button" className={mode === "pathforge" ? "active" : ""} onClick={() => setMode("pathforge")}>Pathforge</button>
         </div>
         <div className="top-actions"><Badge tone={busy ? "warning" : validation?.valid ? "good" : "neutral"}>{busy ? "Running…" : mode === "privacy" && redactionReport ? (redactionReport.valid_for_export ? "Export eligible" : "Review policy") : mode === "lab" && (labRun || labComparison) ? "Lab complete" : validation?.valid ? "Bundle verified" : "Ready"}</Badge></div>
       </header>
@@ -824,6 +864,9 @@ export function App() {
           {mode === "compare" ? <><h2>Comparison cases</h2>{cases.map((item) => <div className="comparison-case" key={item.case_id}><strong>{item.title}</strong><span>{item.case_id === baselineCaseId ? "Baseline" : item.case_id === candidateCaseId ? "Candidate" : "Available"}</span></div>)}{comparison ? <section className="nav-section"><h2>Divergences</h2>{comparison.divergences.map((item) => <button type="button" className={item.divergence_id === selectedDivergenceId ? "case-button active" : "case-button"} key={item.divergence_id} onClick={() => setSelectedDivergenceId(item.divergence_id)}><strong>{item.title}</strong><span>{item.dimension}</span></button>)}</section> : null}</> : null}
           {mode === "privacy" ? <><h2>Case bundles</h2>{cases.map((item) => <button type="button" className={item.case_id === activeCaseId ? "case-button active" : "case-button"} key={item.case_id} onClick={() => setActiveCaseId(item.case_id)}><strong>{item.title}</strong><span>{item.case_id}</span></button>)}<section className="nav-section"><h2>Policies</h2>{policies.map((item) => <button type="button" className={item.policy_id === activePolicyId ? "case-button active" : "case-button"} key={item.policy_id} onClick={() => setActivePolicyId(item.policy_id)}><strong>{item.title}</strong><span>{item.profile}</span><small>{item.rules.length} rules</small></button>)}</section></> : null}
           {mode === "lab" ? <><h2>Concrete bindings</h2>{labBindings.map((item) => <button type="button" className={item.binding_id === activeBindingId ? "case-button active" : "case-button"} key={item.binding_id} onClick={() => setActiveBindingId(item.binding_id)}><strong>{item.title}</strong><span>{item.family_ref}</span><small>{item.topology_roles.length} roles</small></button>)}{activeGraph ? <section className="nav-section"><h2>Runtime nodes</h2>{activeGraph.nodes.map((node) => <button type="button" className={node.node_id === selectedNodeId ? "node-row selected" : "node-row"} key={node.node_id} onClick={() => setSelectedNodeId(node.node_id)}><span className="kind">{node.kind}</span><span className="operation">{node.operation}</span></button>)}</section> : null}</> : null}
+          {mode === "coverage" ? <><h2>Coverage dimensions</h2>{["family","universe_axis","topology","fault_operator","invariant","observability","interaction","outcome","realization"].map((item)=><div className="comparison-case" key={item}><strong>{item.replaceAll("_"," ")}</strong><span>Semantic dimension</span></div>)}</> : null}
+          {mode === "health" ? <><h2>Case bundles</h2>{cases.map((item)=><button type="button" className={item.case_id===activeCaseId?"case-button active":"case-button"} key={item.case_id} onClick={()=>setActiveCaseId(item.case_id)}><strong>{item.title}</strong><span>{item.valid?"Verified":"Review"}</span></button>)}</> : null}
+          {mode === "pathforge" ? <><h2>Pathforge bindings</h2>{pathforgeBindings.map((item)=><button type="button" className={item.binding_id===activePathforgeBindingId?"case-button active":"case-button"} key={item.binding_id} onClick={()=>setActivePathforgeBindingId(item.binding_id)}><strong>{item.title}</strong><span>{item.workflow_kind}</span><small>{item.generic_invariants.length} generic invariants</small></button>)}</> : null}
         </aside>
         <section className="canvas">
           {mode === "explore" ? <CaseWorkspace detail={detail} graph={graph} timeline={timeline} selectedNodeId={selectedNodeId} onSelectNode={setSelectedNodeId} visualMode={visualMode} onVisualMode={setVisualMode} analysis={analysis} selectedFindingId={selectedFindingId} onSelectFinding={setSelectedFindingId} /> : null}
@@ -831,8 +874,11 @@ export function App() {
           {mode === "compare" ? <CompareWorkspace cases={cases} baselineCaseId={baselineCaseId} candidateCaseId={candidateCaseId} onBaseline={setBaselineCaseId} onCandidate={setCandidateCaseId} comparison={comparison} running={busy} onRun={runComparison} selectedDivergenceId={selectedDivergenceId} onSelectDivergence={setSelectedDivergenceId} /> : null}
           {mode === "privacy" ? <PrivacyStudio cases={cases} activeCaseId={activeCaseId} onCase={setActiveCaseId} policies={policies} policyId={activePolicyId} onPolicy={setActivePolicyId} inventory={inventory} report={redactionReport} exportResult={exportResult} running={busy} onInventory={() => guard(async () => { if (activeCaseId && activePolicyId) setInventory(await getPrivacyInventory(activeCaseId, activePolicyId)); })} onPreview={() => guard(async () => { if (activeCaseId && activePolicyId) setRedactionReport(await previewRedaction(activeCaseId, activePolicyId)); })} onExport={() => guard(async () => { if (activeCaseId && activePolicyId) setExportResult(await exportShareable(activeCaseId, activePolicyId)); })} /> : null}
           {mode === "lab" ? <LiveLab bindings={labBindings} bindingId={activeBindingId} onBinding={setActiveBindingId} fault={labFault} onFault={setLabFault} result={labRun} comparison={labComparison} running={busy} selectedNodeId={selectedNodeId} onSelectNode={setSelectedNodeId} visualMode={visualMode} onVisualMode={setVisualMode} onRun={() => guard(async () => { const value = await runLab(labPayload()); setLabRun(value); setLabComparison(undefined); setSelectedNodeId(value.graph.nodes[0]?.node_id); })} onCompare={() => guard(async () => { const value = await compareLab(labPayload()); setLabComparison(value); setLabRun(undefined); setSelectedNodeId(value.candidate.graph.nodes[0]?.node_id); })} onPersist={() => guard(async () => { await persistLab(labPayload()); setCases(await listCases()); })} /> : null}
+          {mode === "coverage" ? <CoverageObservatory report={coverage} running={busy} onRefresh={() => guard(async()=>setCoverage(await getCoverageReport()))} /> : null}
+          {mode === "health" ? <HealthCenter cases={cases} activeCaseId={activeCaseId} onCase={setActiveCaseId} report={healthReport} running={busy} onScan={() => guard(async()=>{ if(activeCaseId) setHealthReport(await getBundleHealth(activeCaseId)); })} /> : null}
+          {mode === "pathforge" ? <PathforgeStudio bindings={pathforgeBindings} bindingId={activePathforgeBindingId} onBinding={setActivePathforgeBindingId} running={busy} runResult={pathforgeRun} comparison={pathforgeComparison} onRun={() => guard(async()=>{ if(activePathforgeBindingId){ setPathforgeRun(await runPathforge({binding_ref:activePathforgeBindingId,seed:91})); setPathforgeComparison(undefined); } })} onCompare={() => guard(async()=>{ if(activePathforgeBindingId){ setPathforgeComparison(await comparePathforge({binding_ref:activePathforgeBindingId,seed:91,fault:"tenant-loss"})); setPathforgeRun(undefined); } })} /> : null}
         </section>
-        <aside className="inspector"><span className="eyebrow">Inspector</span>{mode === "explore" && activeCase ? <div className="inspector-case"><strong>{activeCase.title}</strong><small>{activeCase.scenario_family ?? activeCase.case_id}</small></div> : null}{["explore", "construct", "lab"].includes(mode) ? <NodeInspector node={selectedNode} graph={activeGraph} /> : null}{mode === "explore" ? <FindingInspector finding={selectedFinding} /> : null}{mode === "compare" ? <DivergenceInspector divergence={selectedDivergence} /> : null}{mode === "privacy" && redactionReport ? <section className="inspector-section"><h2>Policy result</h2><dl><dt>Profile</dt><dd>{redactionReport.profile}</dd><dt>Transformations</dt><dd>{redactionReport.transformations.length}</dd><dt>Violations</dt><dd>{redactionReport.violations.length}</dd></dl></section> : null}</aside>
+        <aside className="inspector"><span className="eyebrow">Inspector</span>{mode === "explore" && activeCase ? <div className="inspector-case"><strong>{activeCase.title}</strong><small>{activeCase.scenario_family ?? activeCase.case_id}</small></div> : null}{["explore", "construct", "lab"].includes(mode) ? <NodeInspector node={selectedNode} graph={activeGraph} /> : null}{mode === "explore" ? <FindingInspector finding={selectedFinding} /> : null}{mode === "compare" ? <DivergenceInspector divergence={selectedDivergence} /> : null}{mode === "coverage" && coverage ? <section className="inspector-section"><h2>Coverage result</h2><dl><dt>Registry</dt><dd>{coverage.registry_version}</dd><dt>Covered</dt><dd>{coverage.summary.covered ?? 0}</dd><dt>Uncovered</dt><dd>{coverage.summary.uncovered ?? 0}</dd></dl></section> : null}{mode === "health" && healthReport ? <section className="inspector-section"><h2>Health result</h2><dl><dt>Status</dt><dd>{healthReport.compatibility.status}</dd><dt>Valid</dt><dd>{String(healthReport.health.valid)}</dd><dt>Recoverable</dt><dd>{String(healthReport.health.recoverable)}</dd></dl></section> : null}{mode === "pathforge" && activePathforgeBindingId ? <section className="inspector-section"><h2>Integration boundary</h2><p>All Pathforge semantics remain under the <code>pathforge.academic</code> namespace.</p></section> : null}{mode === "privacy" && redactionReport ? <section className="inspector-section"><h2>Policy result</h2><dl><dt>Profile</dt><dd>{redactionReport.profile}</dd><dt>Transformations</dt><dd>{redactionReport.transformations.length}</dd><dt>Violations</dt><dd>{redactionReport.violations.length}</dd></dl></section> : null}</aside>
       </div>
     </main>
   );
