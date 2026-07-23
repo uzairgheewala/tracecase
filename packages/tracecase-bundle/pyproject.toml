@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tracecase-bundle"
+version = "0.1.0"
+description = "Portable, immutable Tracecase bundle implementation"
+requires-python = ">=3.11"
+dependencies = [
+  "pydantic>=2.8,<3",
+  "tracecase-model==0.1.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

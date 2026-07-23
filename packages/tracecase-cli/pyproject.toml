@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tracecase-cli"
+version = "0.1.0"
+description = "Tracecase command-line interface"
+requires-python = ">=3.11"
+dependencies = [
+  "tracecase-model==0.1.0",
+  "tracecase-bundle==0.1.0",
+]
+
+[project.scripts]
+tracecase = "tracecase_cli.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
