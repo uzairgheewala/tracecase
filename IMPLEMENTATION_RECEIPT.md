@@ -1,108 +1,147 @@
-# Milestone C implementation receipt
+# Milestone D implementation receipt
 
 ## Delivery contract
 
-This milestone is delivered as a repository-relative delta over the validated Milestone B repository. The archive contains only added or modified files in their original paths. `DELTA_MANIFEST.json` records additions, modifications, deletions, sizes, and SHA-256 hashes.
+This milestone is delivered as a repository-relative delta over the validated Milestone C repository. The archive contains only added or modified files in their original paths. `DELTA_MANIFEST.json` records additions, modifications, deletions, sizes, and SHA-256 hashes.
 
 ## Roadmap scope
 
-Milestone C implements Phases 9–11:
+Milestone D implements Phases 12–13:
 
-1. Generic invariant engine.
-2. Bounded evidence-linked analyzer family pack.
-3. Semantic execution comparison and synchronized comparison UI.
+1. Privacy classification, redaction, validation, and shareable export.
+2. Concrete distributed reference laboratory with generic fault bindings and live Workbench controls.
 
 ## Added packages
 
-### `tracecase-invariants`
+### `tracecase-policy`
 
-Provides versioned invariant contracts, evidence requirements, scope selectors, evaluator kinds, a deterministic runtime, minimal counterexamples, evaluation traces, and six-state outcomes.
+Provides:
 
-The default registry contains 13 framework-neutral invariants spanning continuity, isolation, liveness, ordering, consistency, compatibility, resources, observability, and privacy.
+- three export profiles;
+- ordered, schema-aware policy rules;
+- field inventory and sensitivity accounting;
+- deterministic tokenization, digesting, masking, truncation, removal, summarization, and rejection;
+- referential-integrity preservation;
+- prohibited-pattern scanning;
+- export-validation reports;
+- privacy-aware portable bundle export.
 
-### `tracecase-analyzers`
+The shareable exporter does not copy source derived artifacts. It sanitizes canonical evidence, rebuilds graph/timeline/invariants/findings, copies only allowlisted supplements, and writes policy and validation artifacts into the integrity-covered derivative bundle.
 
-Provides analyzer definitions, run receipts, bounded findings, severity/category taxonomies, and a deterministic analyzer engine. Seven initial analyzer packs cover context, identity, retry/effects, transaction ordering, observability, resource amplification, and contract/privacy behavior.
+### `tracecase-lab`
 
-### `tracecase-compare`
+Provides:
 
-Provides topology-aware semantic signatures, constrained node alignment, ambiguity handling, divergence classification, noise suppression, temporal ranking, and first-meaningful-divergence selection.
+- generic `LabBinding` contracts;
+- deterministic `LabRunRequest`, events, receipts, run results, and comparison results;
+- an in-process reference workflow;
+- fault-to-lifecycle bindings;
+- automatic graph assembly, timeline generation, invariant evaluation, bounded analysis, and semantic comparison.
 
-## Existing package changes
+The reference binding is academic in presentation but generic in execution semantics. Downstream packages receive ordinary canonical cases and do not import lab-specific types.
 
-- `tracecase-bundle` writes producer version `0.3.0`, points completed manifests to deterministic analysis/comparison artifacts, and fixes archive opening through temporary directories.
-- `tracecase-scenarios` enriches generated execution metadata with family, topology, invariant, expected-effect, and expected-edge contracts.
-- `tracecase-cli` adds `invariants`, `analyze`, and `compare` commands.
-- API case services compute or load invariant and analysis reports and expose new endpoints.
-- A new comparison API performs baseline/candidate semantic comparison.
-- The Workbench adds invariant, finding, and comparison surfaces.
+## Distributed reference application
 
-## Invariant behavior validated
+`apps/reference-lab` adds a Dockerized Django/Celery/PostgreSQL/Redis/mock-SIS workflow with:
 
-The analyzed baseline fixture produces:
+- transcript-import API;
+- import and enrollment persistence;
+- transaction-safe healthy publication using `transaction.on_commit`;
+- Celery normalization and retry behavior;
+- mock external extraction service;
+- shared JSONL evidence sink;
+- controlled generic fault headers;
+- dedicated non-production deployment configuration.
 
-- 13 evaluated invariants;
-- 9 satisfied;
-- 4 not applicable;
-- 0 violations;
-- 0 findings.
+## Privacy behavior validated
 
-The context-failure fixture produces one required-continuity violation and one high-severity bounded finding with a counterexample.
+The privacy-capture case contains deliberately injected credentials, student identifiers, free text, and transcript-like content.
 
-The duplicate-effect fixture produces one at-most-once violation and two high-severity findings: the generic invariant finding and the retry-specific duplicate durable-effect finding.
+Under `policy.shareable.v1` its inventory contains 1,029 traversed fields:
 
-The causal-gap fixture preserves the underlying semantic workflow while producing one observability-linkage violation and two evidence-focused findings.
+- 953 retained;
+- 62 selected for tokenization;
+- 11 selected for summarization;
+- 3 selected for removal.
 
-## Semantic comparison behavior validated
+The deterministic transformation report records 63 actual transformations:
 
-The context baseline/failure comparison produces:
+- 52 tokenizations;
+- 8 summaries;
+- 3 removals.
 
-- 4 aligned nodes;
-- 0 baseline-only nodes;
-- 0 candidate-only nodes;
-- 0 ambiguous alignments;
-- 1 consequential divergence.
+The resulting case has zero policy violations, passes prohibited-pattern validation, preserves canonical references, carries the `shareable` bundle profile, and verifies in both directory and ZIP form.
 
-The selected first meaningful divergence occurs at the consumer operation at 200 ms and identifies the missing `tenant.tenant_id` context field. Regenerated execution identities do not create false divergences.
+## Reference-lab behavior validated
 
-Retry comparison tests additionally validate candidate-only attempts and duplicate durable-effect divergence.
+The healthy workflow contains 10 source events, 10 canonical nodes, two durable effects, 12 satisfied invariants, one not-applicable invariant, and zero findings.
 
-## Portable Milestone C fixtures
+Generic fault bindings produce the expected bounded outcomes:
 
-- `context-analysis-baseline.tracecase`
-- `context-analysis-failure.tracecase`
-- `duplicate-effect-analysis.tracecase`
-- `causal-gap-analysis.tracecase`
-- `semantic-context-comparison.tracecase`
+- context loss → required-continuity violation;
+- duplicate effect → at-most-once violation and duplicate durable-effect finding;
+- publish before commit → read-after-visibility violation;
+- stale state → freshness violation;
+- schema skew → compatibility violation;
+- prohibited capture → privacy violation;
+- broken link → observability-linkage violation while preserving the underlying effects.
 
-Each has an equivalent ZIP transport archive. Analyzed bundles include invariant reports, findings, analyzer run receipts, graph/timeline artifacts, and their prior scenario evidence. The comparison bundle includes case references, alignments, divergences, summary, and complete semantic comparison.
+The context comparison aligns all 10 operations without ambiguity and selects the worker normalization boundary at 205 ms as the first consequential divergence, where `tenant_id` changes from the institution token to absent.
 
 ## Workbench additions
 
-### Explore Cases
+### Redact & Export
 
-- invariant-result list with status and confidence;
-- evidence-linked finding list;
-- finding-to-node navigation;
-- finding inspector with evidence class, limitations, and recommended inspection points;
-- bundle summary counts for findings and violated invariants.
+- case and policy selection;
+- field classification inventory;
+- action and sensitivity summaries;
+- deterministic transformation preview;
+- unresolved violation display;
+- shareable export request;
+- export-path and validation results.
 
-### Compare Executions
+### Live Lab
 
-- baseline and candidate case selection;
-- semantic alignment list;
-- matched, missing, and ambiguous alignment states;
-- divergence navigator;
-- first meaningful divergence callout;
-- divergence evidence and limitation inspector.
+- concrete binding and fault selection;
+- seed and tenant/principal controls;
+- baseline, candidate, and comparison execution;
+- persistence to portable bundles;
+- graph, timeline, semantics, invariant, and finding views;
+- first-divergence presentation.
 
 ## API additions
 
-- `GET /api/cases/{case_id}/invariants`
-- `GET /api/cases/{case_id}/analysis`
-- `POST /api/comparisons`
+- `GET /api/privacy-policies`
+- `POST /api/cases/{case_id}/privacy-inventory`
+- `POST /api/cases/{case_id}/redaction-preview`
+- `POST /api/cases/{case_id}/shareable-export`
+- `GET /api/lab-bindings`
+- `POST /api/lab-runs`
+- `POST /api/lab-comparisons`
+- `POST /api/lab-runs/persist`
 
-The comparison request requires `baseline_case_id` and `candidate_case_id`.
+## CLI additions
+
+- `policy-list`
+- `privacy-inventory`
+- `redaction-preview`
+- `export-shareable`
+- `lab-bindings`
+- `lab-run`
+- `lab-compare`
+
+## Portable Milestone D fixtures
+
+- `reference-lab-baseline.tracecase`
+- `reference-lab-context-loss.tracecase`
+- `reference-lab-duplicate-effect.tracecase`
+- `reference-lab-publish-before-commit.tracecase`
+- `reference-lab-privacy-capture.tracecase`
+- `reference-lab-observability-gap.tracecase`
+- `reference-lab-context-comparison.tracecase`
+- `reference-lab-shareable.tracecase`
+
+Each has an equivalent ZIP transport archive. Lab bundles contain source events, run receipts, graph/timeline artifacts, invariant reports, analyzer findings, and derived semantic projections. The comparison bundle additionally contains alignments and divergences. The shareable bundle contains redaction policy, report, export validation, and recomputed sanitized analysis.
 
 ## Validation result
 
@@ -110,32 +149,36 @@ The final working repository passed:
 
 ```text
 Architecture dependency checks passed.
-37 tests passed.
-10 directory-form bundles verified.
-5 Milestone C ZIP bundles opened and verified.
-Invariant CLI smoke test passed.
-Analyzer CLI smoke test passed.
-Semantic comparison CLI smoke test passed.
+46 tests passed.
+18 directory-form bundles verified.
+8 Milestone D ZIP bundles opened and verified.
+Invariant, analyzer, and semantic comparison CLI smoke tests passed.
+Policy inventory, redaction preview, and shareable export CLI smoke tests passed.
+Reference-lab binding, execution, and comparison CLI smoke tests passed.
+Temporary shareable directory and ZIP exports verified.
 Python compilation passed.
 Workbench TypeScript/TSX syntax transpilation passed for 4 source files.
 ```
 
-A full local Vite production build was not run because npm dependency installation timed out in the execution container. The source syntax passed through the TypeScript compiler API, and CI performs `npm install` plus the complete `npm run build` in a network-enabled environment.
+The complete local Vite production build was not run because the npm dependency tree is unavailable in the execution container. CI performs `npm install` and `npm run build` in a network-enabled environment.
+
+The distributed Docker Compose topology was not launched in this container because Docker is unavailable. Its Python source compiled successfully; the deterministic in-process realization, API contracts, generated evidence, invariant outcomes, analysis, comparison, and portable bundles were fully exercised.
 
 ## Architectural guarantees
 
-- Evidence, graph, invariant, finding, and comparison layers remain distinct.
-- Missing evidence can yield `inconclusive` instead of fabricated certainty.
-- Every finding cites evidence and exposes limitations.
-- Comparison does not rely on run-local trace or span IDs.
-- Generic packages do not import Django, Celery, OpenTelemetry, Pathforge, or application-specific code.
-- Comparison does not depend on a particular analyzer pack.
-- All derived artifacts are additive and integrity-covered.
+- Source and shareable bundles are separate immutable cases.
+- Redaction preserves canonical references.
+- Unknown supplements are omitted unless explicitly allowlisted safe.
+- Derived artifacts are recomputed from disclosed evidence.
+- Policy, transformation, omission, validation, and integrity results remain auditable.
+- Generic fault identities are independent of Django and Celery implementation details.
+- The reference lab uses ordinary canonical cases, invariant results, findings, and comparisons.
+- Observability faults do not alter the modeled ground-truth effects.
+- Fault injection remains isolated from production deployment paths.
 
-## Deferred to Milestone D and later
+## Deferred to later milestones
 
-- Privacy classification, redaction, and export policy engine.
-- Real distributed reference laboratory and live fault injection.
-- Coverage observatory and scenario minimization.
-- Large-case hardening and schema migration systems.
-- Pathforge-specific extensions and analyzers.
+- Coverage observatory and automatic counterexample minimization.
+- Large-case streaming, migrations, and compatibility hardening.
+- Full OSS packaging and extension-author onboarding.
+- Pathforge-specific instrumentation and semantic extensions.

@@ -1,0 +1,1 @@
+{"attributes":{"family_ref":"workflow.distributed-operation.v1","seed":407},"binding_ref":"lab.transcript-import.v1","case_id":"case.lab.407.baseline","completed_at":"2026-07-23T18:06:47.470000Z","event_count":10,"mode":"in_process","run_id":"execution.lab.407.baseline","started_at":"2026-07-23T18:06:47Z","status":"completed"}

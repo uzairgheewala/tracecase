@@ -1,0 +1,2 @@
+{"attributes":{},"durable_count":1,"group_id":"effect-group.4eba083dfa33dbfe","idempotency_keys":["notification-401"],"logical_effect_key":"notification/import-401/completed","member_effect_refs":["effect.lab.notification"]}
+{"attributes":{},"durable_count":1,"group_id":"effect-group.b16ce60248736aa6","idempotency_keys":["import-401"],"logical_effect_key":"enrollment-projection/import-401","member_effect_refs":["effect.lab.enrollment.1"]}

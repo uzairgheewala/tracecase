@@ -6,6 +6,13 @@ import type {
   GeneratedScenario,
   ScenarioFamily,
   SemanticComparison,
+  PrivacyPolicy,
+  FieldInventory,
+  RedactionReport,
+  ShareableExportResult,
+  LabBinding,
+  LabRunResult,
+  LabComparisonResult,
   TimelineModel,
 } from "./types";
 
@@ -69,4 +76,45 @@ export function compareCases(baselineCaseId: string, candidateCaseId: string): P
     method: "POST",
     body: JSON.stringify({ baseline_case_id: baselineCaseId, candidate_case_id: candidateCaseId }),
   });
+}
+
+
+export async function listPrivacyPolicies(): Promise<PrivacyPolicy[]> {
+  const payload = await request<{ items: PrivacyPolicy[] }>("/privacy-policies");
+  return payload.items;
+}
+
+export function getPrivacyInventory(caseId: string, policyId: string): Promise<FieldInventory> {
+  return request<FieldInventory>(`/cases/${encodeURIComponent(caseId)}/privacy-inventory`, {
+    method: "POST", body: JSON.stringify({ policy_id: policyId }),
+  });
+}
+
+export function previewRedaction(caseId: string, policyId: string): Promise<RedactionReport> {
+  return request<RedactionReport>(`/cases/${encodeURIComponent(caseId)}/redaction-preview`, {
+    method: "POST", body: JSON.stringify({ policy_id: policyId }),
+  });
+}
+
+export function exportShareable(caseId: string, policyId: string): Promise<ShareableExportResult> {
+  return request<ShareableExportResult>(`/cases/${encodeURIComponent(caseId)}/shareable-export`, {
+    method: "POST", body: JSON.stringify({ policy_id: policyId }),
+  });
+}
+
+export async function listLabBindings(): Promise<LabBinding[]> {
+  const payload = await request<{ items: LabBinding[] }>("/lab-bindings");
+  return payload.items;
+}
+
+export function runLab(payload: Record<string, unknown>): Promise<LabRunResult> {
+  return request<LabRunResult>("/lab-runs", { method: "POST", body: JSON.stringify(payload) });
+}
+
+export function compareLab(payload: Record<string, unknown>): Promise<LabComparisonResult> {
+  return request<LabComparisonResult>("/lab-comparisons", { method: "POST", body: JSON.stringify(payload) });
+}
+
+export function persistLab(payload: Record<string, unknown>): Promise<Record<string, unknown>> {
+  return request<Record<string, unknown>>("/lab-runs/persist", { method: "POST", body: JSON.stringify(payload) });
 }

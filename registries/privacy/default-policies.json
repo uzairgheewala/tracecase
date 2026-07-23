@@ -1,0 +1,418 @@
+[
+  {
+    "attributes": {},
+    "default_action": "retain",
+    "policy_id": "policy.internal.v1",
+    "preserve_referential_integrity": true,
+    "profile": "internal",
+    "prohibited_patterns": [
+      "(?i)authorization:\\s*bearer\\s+\\S+",
+      "(?i)password\\s*[=:]\\s*\\S+"
+    ],
+    "rules": [
+      {
+        "action": "reject",
+        "description": "",
+        "key_pattern": null,
+        "labels": [
+          "credential"
+        ],
+        "max_length": 48,
+        "path_glob": "*",
+        "priority": 5,
+        "replacement": null,
+        "rule_id": "credential.reject",
+        "value_pattern": null
+      }
+    ],
+    "stable_token_scope": "bundle",
+    "title": "Internal diagnostic export",
+    "version": "1.0.0"
+  },
+  {
+    "attributes": {
+      "copy_unknown_supplements": false,
+      "unknown_sensitive_action": "reject"
+    },
+    "default_action": "retain",
+    "policy_id": "policy.shareable.v1",
+    "preserve_referential_integrity": true,
+    "profile": "shareable",
+    "prohibited_patterns": [
+      "(?i)bearer\\s+[a-z0-9._~+/-]+=*",
+      "AKIA[0-9A-Z]{16}",
+      "(?i)(password|passwd|secret|api[_-]?key)\\s*[=:]\\s*[^\\s,}\\]]+",
+      "-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"
+    ],
+    "rules": [
+      {
+        "action": "remove",
+        "description": "Credentials never leave the collection environment.",
+        "key_pattern": null,
+        "labels": [
+          "credential"
+        ],
+        "max_length": 48,
+        "path_glob": "*",
+        "priority": 1,
+        "replacement": null,
+        "rule_id": "credential.remove",
+        "value_pattern": null
+      },
+      {
+        "action": "remove",
+        "description": "",
+        "key_pattern": "(?i)(authorization|cookie|password|passwd|secret|api[_-]?key|access[_-]?token|refresh[_-]?token)",
+        "labels": [],
+        "max_length": 48,
+        "path_glob": "*",
+        "priority": 2,
+        "replacement": null,
+        "rule_id": "secret-key.remove",
+        "value_pattern": null
+      },
+      {
+        "action": "tokenize",
+        "description": "",
+        "key_pattern": null,
+        "labels": [
+          "student_record"
+        ],
+        "max_length": 48,
+        "path_glob": "*",
+        "priority": 10,
+        "replacement": null,
+        "rule_id": "student.tokenize",
+        "value_pattern": null
+      },
+      {
+        "action": "tokenize",
+        "description": "",
+        "key_pattern": null,
+        "labels": [
+          "user_identifier"
+        ],
+        "max_length": 48,
+        "path_glob": "*",
+        "priority": 11,
+        "replacement": null,
+        "rule_id": "user.tokenize",
+        "value_pattern": null
+      },
+      {
+        "action": "tokenize",
+        "description": "",
+        "key_pattern": null,
+        "labels": [
+          "tenant_identifier"
+        ],
+        "max_length": 48,
+        "path_glob": "*",
+        "priority": 12,
+        "replacement": null,
+        "rule_id": "tenant.tokenize",
+        "value_pattern": null
+      },
+      {
+        "action": "summarize",
+        "description": "",
+        "key_pattern": null,
+        "labels": [
+          "free_text"
+        ],
+        "max_length": 48,
+        "path_glob": "*",
+        "priority": 20,
+        "replacement": null,
+        "rule_id": "free-text.summarize",
+        "value_pattern": null
+      },
+      {
+        "action": "digest",
+        "description": "",
+        "key_pattern": null,
+        "labels": [
+          "query_text"
+        ],
+        "max_length": 48,
+        "path_glob": "*",
+        "priority": 21,
+        "replacement": null,
+        "rule_id": "query.digest",
+        "value_pattern": null
+      },
+      {
+        "action": "digest",
+        "description": "",
+        "key_pattern": null,
+        "labels": [
+          "payload_derived"
+        ],
+        "max_length": 48,
+        "path_glob": "*",
+        "priority": 22,
+        "replacement": null,
+        "rule_id": "payload.digest",
+        "value_pattern": null
+      },
+      {
+        "action": "tokenize",
+        "description": "",
+        "key_pattern": null,
+        "labels": [],
+        "max_length": 48,
+        "path_glob": "*.identities.principal_id",
+        "priority": 8,
+        "replacement": null,
+        "rule_id": "principal.tokenize",
+        "value_pattern": null
+      },
+      {
+        "action": "tokenize",
+        "description": "",
+        "key_pattern": null,
+        "labels": [],
+        "max_length": 48,
+        "path_glob": "*.identities.tenant_id",
+        "priority": 8,
+        "replacement": null,
+        "rule_id": "tenant-identity.tokenize",
+        "value_pattern": null
+      },
+      {
+        "action": "tokenize",
+        "description": "",
+        "key_pattern": null,
+        "labels": [],
+        "max_length": 48,
+        "path_glob": "*.identities.session_id",
+        "priority": 8,
+        "replacement": null,
+        "rule_id": "session.tokenize",
+        "value_pattern": null
+      },
+      {
+        "action": "tokenize",
+        "description": "",
+        "key_pattern": null,
+        "labels": [],
+        "max_length": 48,
+        "path_glob": "*.provenance.source_native_id",
+        "priority": 30,
+        "replacement": null,
+        "rule_id": "source-native.tokenize",
+        "value_pattern": null
+      }
+    ],
+    "stable_token_scope": "bundle",
+    "title": "Shareable engineering case",
+    "version": "1.0.0"
+  },
+  {
+    "attributes": {
+      "copy_unknown_supplements": false,
+      "unknown_sensitive_action": "reject"
+    },
+    "default_action": "retain",
+    "policy_id": "policy.public.v1",
+    "preserve_referential_integrity": true,
+    "profile": "public",
+    "prohibited_patterns": [
+      "(?i)bearer\\s+[a-z0-9._~+/-]+=*",
+      "AKIA[0-9A-Z]{16}",
+      "(?i)(password|passwd|secret|api[_-]?key)\\s*[=:]\\s*[^\\s,}\\]]+",
+      "-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"
+    ],
+    "rules": [
+      {
+        "action": "remove",
+        "description": "Credentials never leave the collection environment.",
+        "key_pattern": null,
+        "labels": [
+          "credential"
+        ],
+        "max_length": 48,
+        "path_glob": "*",
+        "priority": 1,
+        "replacement": null,
+        "rule_id": "credential.remove",
+        "value_pattern": null
+      },
+      {
+        "action": "remove",
+        "description": "",
+        "key_pattern": "(?i)(authorization|cookie|password|passwd|secret|api[_-]?key|access[_-]?token|refresh[_-]?token)",
+        "labels": [],
+        "max_length": 48,
+        "path_glob": "*",
+        "priority": 2,
+        "replacement": null,
+        "rule_id": "secret-key.remove",
+        "value_pattern": null
+      },
+      {
+        "action": "tokenize",
+        "description": "",
+        "key_pattern": null,
+        "labels": [
+          "student_record"
+        ],
+        "max_length": 48,
+        "path_glob": "*",
+        "priority": 10,
+        "replacement": null,
+        "rule_id": "student.tokenize",
+        "value_pattern": null
+      },
+      {
+        "action": "tokenize",
+        "description": "",
+        "key_pattern": null,
+        "labels": [
+          "user_identifier"
+        ],
+        "max_length": 48,
+        "path_glob": "*",
+        "priority": 11,
+        "replacement": null,
+        "rule_id": "user.tokenize",
+        "value_pattern": null
+      },
+      {
+        "action": "tokenize",
+        "description": "",
+        "key_pattern": null,
+        "labels": [
+          "tenant_identifier"
+        ],
+        "max_length": 48,
+        "path_glob": "*",
+        "priority": 12,
+        "replacement": null,
+        "rule_id": "tenant.tokenize",
+        "value_pattern": null
+      },
+      {
+        "action": "summarize",
+        "description": "",
+        "key_pattern": null,
+        "labels": [
+          "free_text"
+        ],
+        "max_length": 48,
+        "path_glob": "*",
+        "priority": 20,
+        "replacement": null,
+        "rule_id": "free-text.summarize",
+        "value_pattern": null
+      },
+      {
+        "action": "digest",
+        "description": "",
+        "key_pattern": null,
+        "labels": [
+          "query_text"
+        ],
+        "max_length": 48,
+        "path_glob": "*",
+        "priority": 21,
+        "replacement": null,
+        "rule_id": "query.digest",
+        "value_pattern": null
+      },
+      {
+        "action": "digest",
+        "description": "",
+        "key_pattern": null,
+        "labels": [
+          "payload_derived"
+        ],
+        "max_length": 48,
+        "path_glob": "*",
+        "priority": 22,
+        "replacement": null,
+        "rule_id": "payload.digest",
+        "value_pattern": null
+      },
+      {
+        "action": "tokenize",
+        "description": "",
+        "key_pattern": null,
+        "labels": [],
+        "max_length": 48,
+        "path_glob": "*.identities.principal_id",
+        "priority": 8,
+        "replacement": null,
+        "rule_id": "principal.tokenize",
+        "value_pattern": null
+      },
+      {
+        "action": "tokenize",
+        "description": "",
+        "key_pattern": null,
+        "labels": [],
+        "max_length": 48,
+        "path_glob": "*.identities.tenant_id",
+        "priority": 8,
+        "replacement": null,
+        "rule_id": "tenant-identity.tokenize",
+        "value_pattern": null
+      },
+      {
+        "action": "tokenize",
+        "description": "",
+        "key_pattern": null,
+        "labels": [],
+        "max_length": 48,
+        "path_glob": "*.identities.session_id",
+        "priority": 8,
+        "replacement": null,
+        "rule_id": "session.tokenize",
+        "value_pattern": null
+      },
+      {
+        "action": "tokenize",
+        "description": "",
+        "key_pattern": null,
+        "labels": [],
+        "max_length": 48,
+        "path_glob": "*.provenance.source_native_id",
+        "priority": 30,
+        "replacement": null,
+        "rule_id": "source-native.tokenize",
+        "value_pattern": null
+      },
+      {
+        "action": "mask",
+        "description": "",
+        "key_pattern": null,
+        "labels": [
+          "network_metadata"
+        ],
+        "max_length": 48,
+        "path_glob": "*",
+        "priority": 15,
+        "replacement": null,
+        "rule_id": "network.mask",
+        "value_pattern": null
+      },
+      {
+        "action": "digest",
+        "description": "",
+        "key_pattern": null,
+        "labels": [
+          "internal"
+        ],
+        "max_length": 48,
+        "path_glob": "*",
+        "priority": 50,
+        "replacement": null,
+        "rule_id": "internal.digest",
+        "value_pattern": null
+      }
+    ],
+    "stable_token_scope": "bundle",
+    "title": "Public issue attachment",
+    "version": "1.0.0"
+  }
+]

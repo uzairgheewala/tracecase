@@ -10,6 +10,8 @@ from tracecase_bundle import BundleBuilder, BundleReader
 from tracecase_compare import SemanticComparisonEngine
 from tracecase_graph import AssembledExecutionGraph, GraphAssembler
 from tracecase_invariants import InvariantRuntime
+from tracecase_lab import LabRunRequest, ReferenceLab, lab_bindings
+from tracecase_policy import PolicyEngine, ShareableBundleExporter, get_policy, policy_registry
 from tracecase_scenarios import (
     FaultApplication,
     FaultTargetKind,
@@ -217,6 +219,76 @@ def command_compare(baseline_path: Path, candidate_path: Path) -> int:
         if candidate_temporary:
             candidate_temporary.cleanup()
 
+
+def command_policy_list() -> int:
+    print(json.dumps([item.model_dump(mode="json") for item in policy_registry()], indent=2, sort_keys=True))
+    return 0
+
+
+def command_privacy_inventory(path: Path, policy_id: str) -> int:
+    reader, temporary = BundleReader.open(path)
+    try:
+        report = PolicyEngine(get_policy(policy_id)).inventory(reader.load_case())
+        print(json.dumps(report.model_dump(mode="json"), indent=2, sort_keys=True))
+        return 0
+    finally:
+        if temporary:
+            temporary.cleanup()
+
+
+def command_redaction_preview(path: Path, policy_id: str) -> int:
+    reader, temporary = BundleReader.open(path)
+    try:
+        _case, report = PolicyEngine(get_policy(policy_id)).apply(reader.load_case())
+        print(json.dumps(report.model_dump(mode="json"), indent=2, sort_keys=True))
+        return 0 if report.valid_for_export else 2
+    finally:
+        if temporary:
+            temporary.cleanup()
+
+
+def command_export_shareable(path: Path, destination: Path, policy_id: str, archive: Path | None) -> int:
+    reader, temporary = BundleReader.open(path)
+    try:
+        result = ShareableBundleExporter(get_policy(policy_id)).export(
+            reader, destination, archive_path=archive, overwrite=True
+        )
+        print(json.dumps(result.model_dump(mode="json"), indent=2, sort_keys=True))
+        return 0
+    finally:
+        if temporary:
+            temporary.cleanup()
+
+
+def command_lab_bindings() -> int:
+    print(json.dumps([item.model_dump(mode="json") for item in lab_bindings()], indent=2, sort_keys=True))
+    return 0
+
+
+def _lab_request(args: argparse.Namespace) -> LabRunRequest:
+    return LabRunRequest(
+        binding_ref=args.binding, seed=args.seed, fault_operator_ref=args.fault,
+        observability_fault_ref=args.observability_fault, tenant_id=args.tenant_id,
+        principal_id=args.principal_id, include_sensitive_payload=args.include_sensitive_payload,
+    )
+
+
+def command_lab_run(args: argparse.Namespace) -> int:
+    result = ReferenceLab().run(_lab_request(args))
+    if args.output:
+        builder = BundleBuilder(args.output)
+        builder.build(result.case, overwrite=True, analysis_status="complete")
+        if args.archive:
+            builder.pack(args.archive, overwrite=True)
+    print(json.dumps(result.model_dump(mode="json"), indent=2, sort_keys=True))
+    return 0
+
+
+def command_lab_compare(args: argparse.Namespace) -> int:
+    result = ReferenceLab().compare(_lab_request(args))
+    print(json.dumps(result.model_dump(mode="json"), indent=2, sort_keys=True))
+    return 0
+
 def _parse_assignments(values: list[str] | None) -> dict[str, object]:
     result: dict[str, object] = {}
     for item in values or []:
@@ -283,6 +355,36 @@ def build_parser() -> argparse.ArgumentParser:
     compare_parser = subparsers.add_parser("compare", help="Semantically align and compare two case bundles")
     compare_parser.add_argument("baseline", type=Path)
     compare_parser.add_argument("candidate", type=Path)
+
+    subparsers.add_parser("policy-list", help="List privacy and export policies")
+
+    inventory_parser = subparsers.add_parser("privacy-inventory", help="Classify case fields for export")
+    inventory_parser.add_argument("path", type=Path)
+    inventory_parser.add_argument("--policy", default="policy.shareable.v1")
+
+    preview_parser = subparsers.add_parser("redaction-preview", help="Preview deterministic redaction transformations")
+    preview_parser.add_argument("path", type=Path)
+    preview_parser.add_argument("--policy", default="policy.shareable.v1")
+
+    export_parser = subparsers.add_parser("export-shareable", help="Create a privacy-validated shareable bundle")
+    export_parser.add_argument("path", type=Path)
+    export_parser.add_argument("destination", type=Path)
+    export_parser.add_argument("--archive", type=Path)
+    export_parser.add_argument("--policy", default="policy.shareable.v1")
+
+    subparsers.add_parser("lab-bindings", help="List concrete reference-lab bindings")
+    for command in ("lab-run", "lab-compare"):
+        lab_parser = subparsers.add_parser(command, help="Run the distributed reference laboratory")
+        lab_parser.add_argument("--binding", default="lab.transcript-import.v1")
+        lab_parser.add_argument("--seed", type=int, default=1)
+        lab_parser.add_argument("--fault")
+        lab_parser.add_argument("--observability-fault")
+        lab_parser.add_argument("--tenant-id", default="institution-alpha")
+        lab_parser.add_argument("--principal-id", default="student-1001")
+        lab_parser.add_argument("--include-sensitive-payload", action="store_true")
+        if command == "lab-run":
+            lab_parser.add_argument("--output", type=Path)
+            lab_parser.add_argument("--archive", type=Path)
     return parser
 
 
@@ -308,6 +410,21 @@ def main(argv: list[str] | None = None) -> int:
         return command_analyze(args.path)
     if args.command == "compare":
         return command_compare(args.baseline, args.candidate)
+
+    if args.command == "policy-list":
+        return command_policy_list()
+    if args.command == "privacy-inventory":
+        return command_privacy_inventory(args.path, args.policy)
+    if args.command == "redaction-preview":
+        return command_redaction_preview(args.path, args.policy)
+    if args.command == "export-shareable":
+        return command_export_shareable(args.path, args.destination, args.policy, args.archive)
+    if args.command == "lab-bindings":
+        return command_lab_bindings()
+    if args.command == "lab-run":
+        return command_lab_run(args)
+    if args.command == "lab-compare":
+        return command_lab_compare(args)
     raise AssertionError(f"unknown command: {args.command}")
 
 

@@ -10,3 +10,5 @@ pydantic>=2.8,<3
 -e ../../packages/tracecase-invariants
 -e ../../packages/tracecase-analyzers
 -e ../../packages/tracecase-compare
+-e ../../packages/tracecase-policy
+-e ../../packages/tracecase-lab

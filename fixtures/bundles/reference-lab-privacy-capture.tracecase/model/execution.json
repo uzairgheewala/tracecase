@@ -1,0 +1,1 @@
+{"evidence_classification":"recorded","execution_id":"execution.lab.405.candidate","extensions":{"tracecase.scenario":{"expected_effects":[{"logical_effect_key":"enrollment-projection/import-405","required":true}],"family_ref":"workflow.distributed-operation.v1","fault_operator_ref":"fault.privacy.capture-secret.v1","observability_fault_ref":null}}}

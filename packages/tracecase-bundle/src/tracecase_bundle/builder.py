@@ -82,7 +82,7 @@ class BundleBuilder:
 
     def __init__(self, output_path: Path, *, producer: ProducerDescriptor | None = None) -> None:
         self.output_path = output_path
-        self.producer = producer or ProducerDescriptor(name="tracecase", version="0.3.0")
+        self.producer = producer or ProducerDescriptor(name="tracecase", version="0.4.0")
         self._frozen = False
 
     def build(
@@ -95,6 +95,7 @@ class BundleBuilder:
         scenario: ScenarioDescriptor | None = None,
         collection: CollectionDescriptor | None = None,
         analysis_status: str = "not_started",
+        privacy: PrivacyDescriptor | None = None,
     ) -> BuildResult:
         if self._frozen:
             raise RuntimeError("builder has already frozen a bundle")
@@ -139,7 +140,7 @@ class BundleBuilder:
             producer=self.producer,
             roots=case.specification.roots,
             baselines=case.specification.baseline_case_refs,
-            privacy=PrivacyDescriptor(classification="internal"),
+            privacy=privacy or PrivacyDescriptor(classification="internal"),
             analysis=AnalysisDescriptor(
                 status=analysis_status,
                 analysis_runs_ref=("analysis/analysis_report.json" if analysis_status == "complete" else "comparison/semantic_comparison.json" if analysis_status == "comparison_complete" else "analysis/graph_assembly_report.json" if analysis_status != "not_started" else None),

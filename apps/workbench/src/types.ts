@@ -324,3 +324,108 @@ export interface SemanticComparison {
   };
   limitations: string[];
 }
+
+export interface PrivacyPolicy {
+  policy_id: string;
+  version: string;
+  title: string;
+  profile: string;
+  default_action: string;
+  rules: Array<{ rule_id: string; action: string; path_glob: string; priority: number; description: string }>;
+  prohibited_patterns: string[];
+}
+
+export interface InventoryItem {
+  path: string;
+  value_type: string;
+  labels: string[];
+  matched_rule_ref?: string;
+  proposed_action: string;
+  preview: string;
+  structural: boolean;
+}
+
+export interface FieldInventory {
+  inventory_id: string;
+  case_id: string;
+  policy_ref: string;
+  items: InventoryItem[];
+  by_label: Record<string, number>;
+  by_action: Record<string, number>;
+}
+
+export interface RedactionReport {
+  report_id: string;
+  case_id: string;
+  policy_ref: string;
+  profile: string;
+  transformations: Array<{
+    transformation_id: string;
+    path: string;
+    action: string;
+    rule_ref?: string;
+    labels: string[];
+    replacement_preview?: string;
+    removed: boolean;
+  }>;
+  violations: Array<{ violation_id: string; code: string; severity: string; path: string; message: string; preview?: string }>;
+  removed_paths: string[];
+  token_count: number;
+  valid_for_export: boolean;
+  summary: Record<string, number>;
+}
+
+export interface ShareableExportResult {
+  source_case_id: string;
+  exported_case_id: string;
+  bundle_path: string;
+  archive_path?: string;
+  policy_ref: string;
+  redaction_report: RedactionReport;
+  validation_report: {
+    valid: boolean;
+    violations: Array<Record<string, unknown>>;
+    scanned_values: number;
+    prohibited_matches: number;
+    integrity_valid?: boolean;
+  };
+}
+
+export interface LabBinding {
+  binding_id: string;
+  family_ref: string;
+  title: string;
+  description: string;
+  supported_faults: string[];
+  topology_roles: string[];
+  invariant_refs: string[];
+  runtime_modes: string[];
+}
+
+export interface LabRunResult {
+  receipt: {
+    run_id: string;
+    binding_ref: string;
+    mode: string;
+    status: string;
+    fault_operator_ref?: string;
+    observability_fault_ref?: string;
+    event_count: number;
+    case_id: string;
+  };
+  case: {
+    specification: CaseDetail["specification"];
+    system: SystemModel;
+    evidence: { execution: Record<string, unknown> };
+  };
+  graph: AssembledGraph;
+  timeline: TimelineModel;
+  analysis: AnalysisReport;
+  events: Array<Record<string, unknown>>;
+}
+
+export interface LabComparisonResult {
+  baseline: LabRunResult;
+  candidate: LabRunResult;
+  comparison: SemanticComparison;
+}

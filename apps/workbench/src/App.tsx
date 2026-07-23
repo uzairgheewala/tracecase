@@ -11,6 +11,14 @@ import {
   getValidation,
   listCases,
   listScenarioFamilies,
+  listPrivacyPolicies,
+  getPrivacyInventory,
+  previewRedaction,
+  exportShareable,
+  listLabBindings,
+  runLab,
+  compareLab,
+  persistLab,
 } from "./api";
 import type {
   AnalysisReport,
@@ -25,9 +33,16 @@ import type {
   SemanticComparison,
   SystemModel,
   TimelineModel,
+  PrivacyPolicy,
+  FieldInventory,
+  RedactionReport,
+  ShareableExportResult,
+  LabBinding,
+  LabRunResult,
+  LabComparisonResult,
 } from "./types";
 
-type WorkspaceMode = "explore" | "construct" | "compare";
+type WorkspaceMode = "explore" | "construct" | "compare" | "privacy" | "lab";
 type VisualMode = "graph" | "timeline" | "semantics";
 
 function Metric({ label, value, detail }: { label: string; value: number | string; detail?: string }) {
@@ -379,7 +394,7 @@ function CaseWorkspace({
       </div>
       <section className="visual-section">
         <div className="section-heading">
-          <div><span className="eyebrow">Milestone C</span><h2>Reconstructed and evaluated execution</h2></div>
+          <div><span className="eyebrow">Milestone D</span><h2>Reconstructed, evaluated, and export-aware execution</h2></div>
           <VisualSwitcher value={visualMode} onChange={onVisualMode} />
         </div>
         {visualMode === "graph" ? <GraphCanvas graph={graph} system={detail.system} selectedNodeId={selectedNodeId} onSelect={onSelectNode} /> : null}
@@ -611,12 +626,119 @@ function DivergenceInspector({ divergence }: { divergence?: Divergence }) {
   );
 }
 
+function PrivacyStudio({
+  cases,
+  activeCaseId,
+  onCase,
+  policies,
+  policyId,
+  onPolicy,
+  inventory,
+  report,
+  exportResult,
+  running,
+  onInventory,
+  onPreview,
+  onExport,
+}: {
+  cases: CaseSummary[];
+  activeCaseId?: string;
+  onCase: (value: string) => void;
+  policies: PrivacyPolicy[];
+  policyId?: string;
+  onPolicy: (value: string) => void;
+  inventory?: FieldInventory;
+  report?: RedactionReport;
+  exportResult?: ShareableExportResult;
+  running: boolean;
+  onInventory: () => void;
+  onPreview: () => void;
+  onExport: () => void;
+}) {
+  const policy = policies.find((item) => item.policy_id === policyId);
+  return (
+    <div className="privacy-studio stack">
+      <section className="section-heading">
+        <div><span className="eyebrow">Redaction Studio</span><h2>Privacy-safe case export</h2><p>Classify fields, preview deterministic transformations, and emit an integrity-covered shareable bundle.</p></div>
+        <Badge tone={report?.valid_for_export ? "good" : report ? "warning" : "neutral"}>{report ? (report.valid_for_export ? "Export eligible" : "Policy violations") : "Not evaluated"}</Badge>
+      </section>
+      <div className="control-grid">
+        <label>Case bundle<select value={activeCaseId ?? ""} onChange={(event) => onCase(event.target.value)}>{cases.map((item) => <option key={item.case_id} value={item.case_id}>{item.title}</option>)}</select></label>
+        <label>Export policy<select value={policyId ?? ""} onChange={(event) => onPolicy(event.target.value)}>{policies.map((item) => <option key={item.policy_id} value={item.policy_id}>{item.title}</option>)}</select></label>
+      </div>
+      {policy ? <div className="callout"><strong>{policy.profile} profile</strong><span>{policy.rules.length} ordered rules · {policy.prohibited_patterns.length} prohibited patterns</span></div> : null}
+      <div className="button-row">
+        <button type="button" onClick={onInventory} disabled={running || !activeCaseId || !policyId}>Build inventory</button>
+        <button type="button" onClick={onPreview} disabled={running || !activeCaseId || !policyId}>Preview transformations</button>
+        <button type="button" className="primary-button" onClick={onExport} disabled={running || !report?.valid_for_export}>Export shareable bundle</button>
+      </div>
+      {inventory ? <div className="metric-grid"><Metric label="Classified values" value={inventory.items.length} /><Metric label="Tokenize" value={inventory.by_action.tokenize ?? 0} /><Metric label="Remove" value={inventory.by_action.remove ?? 0} /><Metric label="Sensitive labels" value={Object.keys(inventory.by_label).length} /></div> : null}
+      {report ? <><div className="metric-grid"><Metric label="Transformations" value={report.transformations.length} /><Metric label="Stable tokens" value={report.token_count} /><Metric label="Removed paths" value={report.removed_paths.length} /><Metric label="Violations" value={report.violations.length} /></div><section className="data-panel"><h3>Transformation preview</h3><div className="compact-table">{report.transformations.slice(0, 60).map((item) => <div className="table-row" key={item.transformation_id}><code>{item.path}</code><Badge>{item.action}</Badge><span>{item.replacement_preview ?? "removed"}</span></div>)}</div></section></> : null}
+      {exportResult ? <div className="success-panel"><strong>Shareable bundle created</strong><code>{exportResult.archive_path ?? exportResult.bundle_path}</code><span>{exportResult.validation_report.scanned_values} values scanned · integrity {exportResult.validation_report.integrity_valid ? "valid" : "pending"}</span></div> : null}
+    </div>
+  );
+}
+
+function LiveLab({
+  bindings,
+  bindingId,
+  onBinding,
+  fault,
+  onFault,
+  result,
+  comparison,
+  running,
+  selectedNodeId,
+  onSelectNode,
+  visualMode,
+  onVisualMode,
+  onRun,
+  onCompare,
+  onPersist,
+}: {
+  bindings: LabBinding[];
+  bindingId?: string;
+  onBinding: (value: string) => void;
+  fault?: string;
+  onFault: (value: string | undefined) => void;
+  result?: LabRunResult;
+  comparison?: LabComparisonResult;
+  running: boolean;
+  selectedNodeId?: string;
+  onSelectNode: (value: string) => void;
+  visualMode: VisualMode;
+  onVisualMode: (value: VisualMode) => void;
+  onRun: () => void;
+  onCompare: () => void;
+  onPersist: () => void;
+}) {
+  const binding = bindings.find((item) => item.binding_id === bindingId);
+  const active = comparison?.candidate ?? result;
+  return (
+    <div className="lab-workspace stack">
+      <section className="section-heading"><div><span className="eyebrow">Live Scenario Lab</span><h2>{binding?.title ?? "Reference laboratory"}</h2><p>{binding?.description}</p></div><Badge tone={active ? "good" : "neutral"}>{active ? active.receipt.status : "Ready"}</Badge></section>
+      <div className="control-grid">
+        <label>Concrete binding<select value={bindingId ?? ""} onChange={(event) => onBinding(event.target.value)}>{bindings.map((item) => <option key={item.binding_id} value={item.binding_id}>{item.title}</option>)}</select></label>
+        <label>Generic fault<select value={fault ?? ""} onChange={(event) => onFault(event.target.value || undefined)}><option value="">Baseline</option>{binding?.supported_faults.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
+      </div>
+      <div className="button-row"><button type="button" onClick={onRun} disabled={running}>Run candidate</button><button type="button" onClick={onCompare} disabled={running || !fault}>Run baseline + compare</button><button type="button" className="primary-button" onClick={onPersist} disabled={running || !active}>Persist case bundle</button></div>
+      {active ? <><div className="metric-grid"><Metric label="Runtime events" value={active.receipt.event_count} /><Metric label="Nodes" value={active.graph.nodes.length} /><Metric label="Findings" value={active.analysis.findings.length} /><Metric label="Violations" value={active.analysis.invariant_report.results.filter((item) => item.status === "violated").length} /></div><VisualSwitcher value={visualMode} onChange={onVisualMode} />{visualMode === "graph" ? <GraphCanvas graph={active.graph} system={active.case.system} selectedNodeId={selectedNodeId} onSelect={onSelectNode} /> : visualMode === "timeline" ? <TimelineView timeline={active.timeline} selectedNodeId={selectedNodeId} onSelect={onSelectNode} /> : <SemanticsView graph={active.graph} />}</> : <div className="empty-state"><strong>Run the concrete workflow</strong><span>The in-process mode traverses the same semantic boundaries as the Dockerized Django/Celery/PostgreSQL laboratory.</span></div>}
+      {comparison?.comparison.first_meaningful_divergence_ref ? <div className="callout"><strong>First meaningful divergence</strong><span>{comparison.comparison.divergences.find((item) => item.divergence_id === comparison.comparison.first_meaningful_divergence_ref)?.summary}</span></div> : null}
+      {active?.analysis.findings.length ? <section className="data-panel"><h3>Bounded findings</h3>{active.analysis.findings.map((item) => <div className="finding-row" key={item.finding_id}><Badge tone={severityTone(item.severity)}>{item.severity}</Badge><strong>{item.title}</strong><span>{item.summary}</span></div>)}</section> : null}
+    </div>
+  );
+}
+
 export function App() {
   const [mode, setMode] = useState<WorkspaceMode>("explore");
   const [cases, setCases] = useState<CaseSummary[]>([]);
   const [families, setFamilies] = useState<ScenarioFamily[]>([]);
+  const [policies, setPolicies] = useState<PrivacyPolicy[]>([]);
+  const [labBindings, setLabBindings] = useState<LabBinding[]>([]);
   const [activeCaseId, setActiveCaseId] = useState<string>();
   const [activeFamilyId, setActiveFamilyId] = useState<string>();
+  const [activePolicyId, setActivePolicyId] = useState<string>();
+  const [activeBindingId, setActiveBindingId] = useState<string>();
   const [detail, setDetail] = useState<CaseDetail>();
   const [graph, setGraph] = useState<AssembledGraph>();
   const [timeline, setTimeline] = useState<TimelineModel>();
@@ -630,20 +752,25 @@ export function App() {
   const [candidateCaseId, setCandidateCaseId] = useState<string>();
   const [comparison, setComparison] = useState<SemanticComparison>();
   const [selectedDivergenceId, setSelectedDivergenceId] = useState<string>();
-  const [comparing, setComparing] = useState(false);
+  const [inventory, setInventory] = useState<FieldInventory>();
+  const [redactionReport, setRedactionReport] = useState<RedactionReport>();
+  const [exportResult, setExportResult] = useState<ShareableExportResult>();
+  const [labFault, setLabFault] = useState<string>();
+  const [labRun, setLabRun] = useState<LabRunResult>();
+  const [labComparison, setLabComparison] = useState<LabComparisonResult>();
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
 
   useEffect(() => {
-    Promise.all([listCases(), listScenarioFamilies()])
-      .then(([caseItems, familyItems]) => {
-        setCases(caseItems);
-        setFamilies(familyItems);
-        setActiveCaseId(caseItems[0]?.case_id);
-        setActiveFamilyId(familyItems[0]?.family_id);
+    Promise.all([listCases(), listScenarioFamilies(), listPrivacyPolicies(), listLabBindings()])
+      .then(([caseItems, familyItems, policyItems, bindingItems]) => {
+        setCases(caseItems); setFamilies(familyItems); setPolicies(policyItems); setLabBindings(bindingItems);
+        setActiveCaseId(caseItems[0]?.case_id); setActiveFamilyId(familyItems[0]?.family_id);
+        setActivePolicyId(policyItems.find((item) => item.profile === "shareable")?.policy_id ?? policyItems[0]?.policy_id);
+        setActiveBindingId(bindingItems[0]?.binding_id);
         const baseline = caseItems.find((item) => item.title.toLowerCase().includes("baseline")) ?? caseItems[0];
         const candidate = caseItems.find((item) => item.title.toLowerCase().includes("failure")) ?? caseItems[1] ?? caseItems[0];
-        setBaselineCaseId(baseline?.case_id);
-        setCandidateCaseId(candidate?.case_id);
+        setBaselineCaseId(baseline?.case_id); setCandidateCaseId(candidate?.case_id);
       })
       .catch((reason: Error) => setError(reason.message));
   }, []);
@@ -651,41 +778,26 @@ export function App() {
   useEffect(() => {
     if (!activeCaseId) return;
     setError(undefined);
-    Promise.all([
-      getCase(activeCaseId),
-      getAssembledGraph(activeCaseId),
-      getTimeline(activeCaseId),
-      getAnalysis(activeCaseId),
-      getValidation(activeCaseId),
-    ])
+    Promise.all([getCase(activeCaseId), getAssembledGraph(activeCaseId), getTimeline(activeCaseId), getAnalysis(activeCaseId), getValidation(activeCaseId)])
       .then(([caseDetail, graphPayload, timelinePayload, analysisPayload, validationPayload]) => {
-        setDetail(caseDetail);
-        setGraph(graphPayload);
-        setTimeline(timelinePayload);
-        setAnalysis(analysisPayload);
-        setValidation(validationPayload);
-        setSelectedNodeId(graphPayload.nodes[0]?.node_id);
-        setSelectedFindingId(analysisPayload.findings[0]?.finding_id);
+        setDetail(caseDetail); setGraph(graphPayload); setTimeline(timelinePayload); setAnalysis(analysisPayload); setValidation(validationPayload);
+        setSelectedNodeId(graphPayload.nodes[0]?.node_id); setSelectedFindingId(analysisPayload.findings[0]?.finding_id);
       })
       .catch((reason: Error) => setError(reason.message));
   }, [activeCaseId]);
 
-  const runComparison = async () => {
-    if (!baselineCaseId || !candidateCaseId || baselineCaseId === candidateCaseId) return;
-    setComparing(true);
-    setError(undefined);
-    try {
-      const value = await compareCases(baselineCaseId, candidateCaseId);
-      setComparison(value);
-      setSelectedDivergenceId(value.first_meaningful_divergence_ref ?? value.divergences[0]?.divergence_id);
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : String(reason));
-    } finally {
-      setComparing(false);
-    }
+  const guard = async (operation: () => Promise<void>) => {
+    setBusy(true); setError(undefined);
+    try { await operation(); } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setBusy(false); }
   };
+  const runComparison = () => guard(async () => {
+    if (!baselineCaseId || !candidateCaseId || baselineCaseId === candidateCaseId) return;
+    const value = await compareCases(baselineCaseId, candidateCaseId); setComparison(value);
+    setSelectedDivergenceId(value.first_meaningful_divergence_ref ?? value.divergences[0]?.divergence_id);
+  });
+  const labPayload = () => ({ binding_ref: activeBindingId, seed: 71, fault_operator_ref: labFault?.startsWith("fault.observability") ? undefined : labFault, observability_fault_ref: labFault?.startsWith("fault.observability") ? labFault : undefined, include_sensitive_payload: labFault === "fault.privacy.capture-secret.v1" });
 
-  const activeGraph = mode === "construct" ? generated?.graph : mode === "explore" ? graph : undefined;
+  const activeGraph = mode === "construct" ? generated?.graph : mode === "explore" ? graph : mode === "lab" ? (labComparison?.candidate.graph ?? labRun?.graph) : undefined;
   const selectedNode = useMemo(() => activeGraph?.nodes.find((node) => node.node_id === selectedNodeId), [activeGraph, selectedNodeId]);
   const selectedFinding = useMemo(() => analysis?.findings.find((item) => item.finding_id === selectedFindingId), [analysis, selectedFindingId]);
   const selectedDivergence = useMemo(() => comparison?.divergences.find((item) => item.divergence_id === selectedDivergenceId), [comparison, selectedDivergenceId]);
@@ -694,60 +806,33 @@ export function App() {
   return (
     <main className="app-shell">
       <header className="topbar">
-        <div><span className="eyebrow">Milestone C</span><h1>Tracecase Workbench</h1></div>
+        <div><span className="eyebrow">Milestone D</span><h1>Tracecase Workbench</h1></div>
         <div className="mode-switcher">
-          <button type="button" className={mode === "explore" ? "active" : ""} onClick={() => setMode("explore")}>Explore cases</button>
-          <button type="button" className={mode === "construct" ? "active" : ""} onClick={() => setMode("construct")}>Construct scenarios</button>
-          <button type="button" className={mode === "compare" ? "active" : ""} onClick={() => setMode("compare")}>Compare executions</button>
+          <button type="button" className={mode === "explore" ? "active" : ""} onClick={() => setMode("explore")}>Explore</button>
+          <button type="button" className={mode === "construct" ? "active" : ""} onClick={() => setMode("construct")}>Construct</button>
+          <button type="button" className={mode === "compare" ? "active" : ""} onClick={() => setMode("compare")}>Compare</button>
+          <button type="button" className={mode === "privacy" ? "active" : ""} onClick={() => setMode("privacy")}>Redact & export</button>
+          <button type="button" className={mode === "lab" ? "active" : ""} onClick={() => setMode("lab")}>Live lab</button>
         </div>
-        <div className="top-actions">
-          {mode === "compare" ? <Badge tone={comparison ? "good" : "neutral"}>{comparison ? "Comparison ready" : "Select cases"}</Badge> : <Badge tone={validation?.valid ? "good" : "warning"}>{validation?.valid ? "Bundle verified" : "Validation pending"}</Badge>}
-        </div>
+        <div className="top-actions"><Badge tone={busy ? "warning" : validation?.valid ? "good" : "neutral"}>{busy ? "Running…" : mode === "privacy" && redactionReport ? (redactionReport.valid_for_export ? "Export eligible" : "Review policy") : mode === "lab" && (labRun || labComparison) ? "Lab complete" : validation?.valid ? "Bundle verified" : "Ready"}</Badge></div>
       </header>
       {error ? <div className="error global-error" role="alert">{error}</div> : null}
       <div className="workspace">
         <aside className="navigator">
-          {mode === "explore" ? (
-            <>
-              <h2>Case bundles</h2>
-              {cases.map((item) => (
-                <button type="button" className={item.case_id === activeCaseId ? "case-button active" : "case-button"} key={item.case_id} onClick={() => setActiveCaseId(item.case_id)}>
-                  <strong>{item.title}</strong><span>{item.category.replaceAll("_", " ")}</span><small>{item.node_count} nodes · {item.finding_count} findings · {item.violated_invariant_count} violations</small>
-                </button>
-              ))}
-              {analysis?.findings.length ? <section className="nav-section"><h2>Findings</h2>{analysis.findings.map((finding) => <button type="button" className={finding.finding_id === selectedFindingId ? "case-button active" : "case-button"} key={finding.finding_id} onClick={() => { setSelectedFindingId(finding.finding_id); if (finding.node_refs[0]) setSelectedNodeId(finding.node_refs[0]); }}><strong>{finding.title}</strong><span>{finding.severity}</span><small>{finding.classification}</small></button>)}</section> : null}
-              {graph ? <section className="nav-section"><h2>Execution nodes</h2><div className="node-list">{graph.nodes.map((node) => <button type="button" className={node.node_id === selectedNodeId ? "node-row selected" : "node-row"} key={node.node_id} onClick={() => setSelectedNodeId(node.node_id)}><span className="kind">{node.kind.replaceAll("_", " ")}</span><span className="operation">{node.operation}</span><span className={`status status-${node.status}`}>{node.status}</span></button>)}</div></section> : null}
-            </>
-          ) : mode === "construct" ? (
-            <>
-              <h2>Scenario families</h2>
-              {families.map((family) => <button type="button" className={family.family_id === activeFamilyId ? "case-button active" : "case-button"} key={family.family_id} onClick={() => setActiveFamilyId(family.family_id)}><strong>{family.title}</strong><span>{family.family_class}</span><small>{family.universe_axes.length} universe axes · {family.fault_operators.length} faults</small></button>)}
-              {generated ? <section className="nav-section"><h2>Generated nodes</h2><div className="node-list">{generated.graph.nodes.map((node) => <button type="button" className={node.node_id === selectedNodeId ? "node-row selected" : "node-row"} key={node.node_id} onClick={() => setSelectedNodeId(node.node_id)}><span className="kind">{node.kind.replaceAll("_", " ")}</span><span className="operation">{node.operation}</span><span className={`status status-${node.status}`}>{node.status}</span></button>)}</div></section> : null}
-            </>
-          ) : (
-            <>
-              <h2>Comparison cases</h2>
-              {cases.map((item) => <div className="comparison-case" key={item.case_id}><strong>{item.title}</strong><span>{item.case_id === baselineCaseId ? "Baseline" : item.case_id === candidateCaseId ? "Candidate" : "Available"}</span></div>)}
-              {comparison ? <section className="nav-section"><h2>Divergences</h2>{comparison.divergences.map((item) => <button type="button" className={item.divergence_id === selectedDivergenceId ? "case-button active" : "case-button"} key={item.divergence_id} onClick={() => setSelectedDivergenceId(item.divergence_id)}><strong>{item.title}</strong><span>{item.dimension}</span><small>{item.temporal_rank_ms === undefined ? "unranked" : `${Math.round(item.temporal_rank_ms)} ms`}</small></button>)}</section> : null}
-            </>
-          )}
+          {mode === "explore" ? <><h2>Case bundles</h2>{cases.map((item) => <button type="button" className={item.case_id === activeCaseId ? "case-button active" : "case-button"} key={item.case_id} onClick={() => setActiveCaseId(item.case_id)}><strong>{item.title}</strong><span>{item.category.replaceAll("_", " ")}</span><small>{item.node_count} nodes · {item.finding_count} findings</small></button>)}{analysis?.findings.length ? <section className="nav-section"><h2>Findings</h2>{analysis.findings.map((finding) => <button type="button" className={finding.finding_id === selectedFindingId ? "case-button active" : "case-button"} key={finding.finding_id} onClick={() => { setSelectedFindingId(finding.finding_id); if (finding.node_refs[0]) setSelectedNodeId(finding.node_refs[0]); }}><strong>{finding.title}</strong><span>{finding.severity}</span></button>)}</section> : null}</> : null}
+          {mode === "construct" ? <><h2>Scenario families</h2>{families.map((family) => <button type="button" className={family.family_id === activeFamilyId ? "case-button active" : "case-button"} key={family.family_id} onClick={() => setActiveFamilyId(family.family_id)}><strong>{family.title}</strong><span>{family.family_class}</span><small>{family.fault_operators.length} faults</small></button>)}</> : null}
+          {mode === "compare" ? <><h2>Comparison cases</h2>{cases.map((item) => <div className="comparison-case" key={item.case_id}><strong>{item.title}</strong><span>{item.case_id === baselineCaseId ? "Baseline" : item.case_id === candidateCaseId ? "Candidate" : "Available"}</span></div>)}{comparison ? <section className="nav-section"><h2>Divergences</h2>{comparison.divergences.map((item) => <button type="button" className={item.divergence_id === selectedDivergenceId ? "case-button active" : "case-button"} key={item.divergence_id} onClick={() => setSelectedDivergenceId(item.divergence_id)}><strong>{item.title}</strong><span>{item.dimension}</span></button>)}</section> : null}</> : null}
+          {mode === "privacy" ? <><h2>Case bundles</h2>{cases.map((item) => <button type="button" className={item.case_id === activeCaseId ? "case-button active" : "case-button"} key={item.case_id} onClick={() => setActiveCaseId(item.case_id)}><strong>{item.title}</strong><span>{item.case_id}</span></button>)}<section className="nav-section"><h2>Policies</h2>{policies.map((item) => <button type="button" className={item.policy_id === activePolicyId ? "case-button active" : "case-button"} key={item.policy_id} onClick={() => setActivePolicyId(item.policy_id)}><strong>{item.title}</strong><span>{item.profile}</span><small>{item.rules.length} rules</small></button>)}</section></> : null}
+          {mode === "lab" ? <><h2>Concrete bindings</h2>{labBindings.map((item) => <button type="button" className={item.binding_id === activeBindingId ? "case-button active" : "case-button"} key={item.binding_id} onClick={() => setActiveBindingId(item.binding_id)}><strong>{item.title}</strong><span>{item.family_ref}</span><small>{item.topology_roles.length} roles</small></button>)}{activeGraph ? <section className="nav-section"><h2>Runtime nodes</h2>{activeGraph.nodes.map((node) => <button type="button" className={node.node_id === selectedNodeId ? "node-row selected" : "node-row"} key={node.node_id} onClick={() => setSelectedNodeId(node.node_id)}><span className="kind">{node.kind}</span><span className="operation">{node.operation}</span></button>)}</section> : null}</> : null}
         </aside>
         <section className="canvas">
-          {mode === "explore" ? (
-            <CaseWorkspace detail={detail} graph={graph} timeline={timeline} selectedNodeId={selectedNodeId} onSelectNode={setSelectedNodeId} visualMode={visualMode} onVisualMode={setVisualMode} analysis={analysis} selectedFindingId={selectedFindingId} onSelectFinding={setSelectedFindingId} />
-          ) : mode === "construct" ? (
-            <ScenarioLab families={families} activeFamilyId={activeFamilyId} onFamily={setActiveFamilyId} generated={generated} onGenerated={setGenerated} selectedNodeId={selectedNodeId} onSelectNode={setSelectedNodeId} visualMode={visualMode} onVisualMode={setVisualMode} />
-          ) : (
-            <CompareWorkspace cases={cases} baselineCaseId={baselineCaseId} candidateCaseId={candidateCaseId} onBaseline={setBaselineCaseId} onCandidate={setCandidateCaseId} comparison={comparison} running={comparing} onRun={runComparison} selectedDivergenceId={selectedDivergenceId} onSelectDivergence={setSelectedDivergenceId} />
-          )}
+          {mode === "explore" ? <CaseWorkspace detail={detail} graph={graph} timeline={timeline} selectedNodeId={selectedNodeId} onSelectNode={setSelectedNodeId} visualMode={visualMode} onVisualMode={setVisualMode} analysis={analysis} selectedFindingId={selectedFindingId} onSelectFinding={setSelectedFindingId} /> : null}
+          {mode === "construct" ? <ScenarioLab families={families} activeFamilyId={activeFamilyId} onFamily={setActiveFamilyId} generated={generated} onGenerated={setGenerated} selectedNodeId={selectedNodeId} onSelectNode={setSelectedNodeId} visualMode={visualMode} onVisualMode={setVisualMode} /> : null}
+          {mode === "compare" ? <CompareWorkspace cases={cases} baselineCaseId={baselineCaseId} candidateCaseId={candidateCaseId} onBaseline={setBaselineCaseId} onCandidate={setCandidateCaseId} comparison={comparison} running={busy} onRun={runComparison} selectedDivergenceId={selectedDivergenceId} onSelectDivergence={setSelectedDivergenceId} /> : null}
+          {mode === "privacy" ? <PrivacyStudio cases={cases} activeCaseId={activeCaseId} onCase={setActiveCaseId} policies={policies} policyId={activePolicyId} onPolicy={setActivePolicyId} inventory={inventory} report={redactionReport} exportResult={exportResult} running={busy} onInventory={() => guard(async () => { if (activeCaseId && activePolicyId) setInventory(await getPrivacyInventory(activeCaseId, activePolicyId)); })} onPreview={() => guard(async () => { if (activeCaseId && activePolicyId) setRedactionReport(await previewRedaction(activeCaseId, activePolicyId)); })} onExport={() => guard(async () => { if (activeCaseId && activePolicyId) setExportResult(await exportShareable(activeCaseId, activePolicyId)); })} /> : null}
+          {mode === "lab" ? <LiveLab bindings={labBindings} bindingId={activeBindingId} onBinding={setActiveBindingId} fault={labFault} onFault={setLabFault} result={labRun} comparison={labComparison} running={busy} selectedNodeId={selectedNodeId} onSelectNode={setSelectedNodeId} visualMode={visualMode} onVisualMode={setVisualMode} onRun={() => guard(async () => { const value = await runLab(labPayload()); setLabRun(value); setLabComparison(undefined); setSelectedNodeId(value.graph.nodes[0]?.node_id); })} onCompare={() => guard(async () => { const value = await compareLab(labPayload()); setLabComparison(value); setLabRun(undefined); setSelectedNodeId(value.candidate.graph.nodes[0]?.node_id); })} onPersist={() => guard(async () => { await persistLab(labPayload()); setCases(await listCases()); })} /> : null}
         </section>
-        <aside className="inspector">
-          <span className="eyebrow">Inspector</span>
-          {mode === "explore" && activeCase ? <div className="inspector-case"><strong>{activeCase.title}</strong><small>{activeCase.scenario_family ?? activeCase.case_id}</small></div> : null}
-          {mode !== "compare" ? <NodeInspector node={selectedNode} graph={activeGraph} /> : null}
-          {mode === "explore" ? <FindingInspector finding={selectedFinding} /> : null}
-          {mode === "compare" ? <DivergenceInspector divergence={selectedDivergence} /> : null}
-        </aside>
+        <aside className="inspector"><span className="eyebrow">Inspector</span>{mode === "explore" && activeCase ? <div className="inspector-case"><strong>{activeCase.title}</strong><small>{activeCase.scenario_family ?? activeCase.case_id}</small></div> : null}{["explore", "construct", "lab"].includes(mode) ? <NodeInspector node={selectedNode} graph={activeGraph} /> : null}{mode === "explore" ? <FindingInspector finding={selectedFinding} /> : null}{mode === "compare" ? <DivergenceInspector divergence={selectedDivergence} /> : null}{mode === "privacy" && redactionReport ? <section className="inspector-section"><h2>Policy result</h2><dl><dt>Profile</dt><dd>{redactionReport.profile}</dd><dt>Transformations</dt><dd>{redactionReport.transformations.length}</dd><dt>Violations</dt><dd>{redactionReport.violations.length}</dd></dl></section> : null}</aside>
       </div>
     </main>
   );
