@@ -1,9 +1,11 @@
 import type {
+  AnalysisReport,
   AssembledGraph,
   CaseDetail,
   CaseSummary,
   GeneratedScenario,
   ScenarioFamily,
+  SemanticComparison,
   TimelineModel,
 } from "./types";
 
@@ -54,5 +56,17 @@ export function generateScenario(payload: Record<string, unknown>): Promise<Gene
   return request<GeneratedScenario>("/scenario-generate", {
     method: "POST",
     body: JSON.stringify(payload),
+  });
+}
+
+
+export function getAnalysis(caseId: string): Promise<AnalysisReport> {
+  return request<AnalysisReport>(`/cases/${encodeURIComponent(caseId)}/analysis`);
+}
+
+export function compareCases(baselineCaseId: string, candidateCaseId: string): Promise<SemanticComparison> {
+  return request<SemanticComparison>("/comparisons", {
+    method: "POST",
+    body: JSON.stringify({ baseline_case_id: baselineCaseId, candidate_case_id: candidateCaseId }),
   });
 }

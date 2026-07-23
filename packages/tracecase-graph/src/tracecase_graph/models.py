@@ -86,7 +86,7 @@ class GraphAssemblyWarning(TracecaseModel):
 
 class GraphAssemblyReport(TracecaseModel):
     assembler_id: str = "tracecase.graph-assembler"
-    assembler_version: str = "0.2.0"
+    assembler_version: str = "0.3.0"
     source_relation_count: int = Field(ge=0)
     derived_relation_count: int = Field(ge=0)
     identity_group_count: int = Field(ge=0)

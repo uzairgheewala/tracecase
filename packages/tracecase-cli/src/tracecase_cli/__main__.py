@@ -5,8 +5,11 @@ import json
 import sys
 from pathlib import Path
 
+from tracecase_analyzers import AnalyzerEngine
 from tracecase_bundle import BundleBuilder, BundleReader
+from tracecase_compare import SemanticComparisonEngine
 from tracecase_graph import AssembledExecutionGraph, GraphAssembler
+from tracecase_invariants import InvariantRuntime
 from tracecase_scenarios import (
     FaultApplication,
     FaultTargetKind,
@@ -166,6 +169,54 @@ def command_graph_summary(path: Path) -> int:
             temporary.cleanup()
 
 
+
+def _load_case_and_graph(path: Path):
+    reader, temporary = BundleReader.open(path)
+    case = reader.load_case()
+    if reader.has_artifact("analysis/assembled_graph.json"):
+        graph = AssembledExecutionGraph.model_validate(reader.read_json("analysis/assembled_graph.json"))
+    else:
+        graph = GraphAssembler().assemble(case.evidence.execution)
+    return reader, temporary, case, graph
+
+
+def command_invariants(path: Path) -> int:
+    _reader, temporary, case, graph = _load_case_and_graph(path)
+    try:
+        report = InvariantRuntime().evaluate(case, graph)
+        print(json.dumps(report.model_dump(mode="json"), indent=2, sort_keys=True))
+        return 0
+    finally:
+        if temporary:
+            temporary.cleanup()
+
+
+def command_analyze(path: Path) -> int:
+    _reader, temporary, case, graph = _load_case_and_graph(path)
+    try:
+        report = AnalyzerEngine().analyze(case, graph)
+        print(json.dumps(report.model_dump(mode="json"), indent=2, sort_keys=True))
+        return 0
+    finally:
+        if temporary:
+            temporary.cleanup()
+
+
+def command_compare(baseline_path: Path, candidate_path: Path) -> int:
+    _baseline_reader, baseline_temporary, baseline_case, baseline_graph = _load_case_and_graph(baseline_path)
+    _candidate_reader, candidate_temporary, candidate_case, candidate_graph = _load_case_and_graph(candidate_path)
+    try:
+        comparison = SemanticComparisonEngine().compare(
+            baseline_case, baseline_graph, candidate_case, candidate_graph
+        )
+        print(json.dumps(comparison.model_dump(mode="json"), indent=2, sort_keys=True))
+        return 0
+    finally:
+        if baseline_temporary:
+            baseline_temporary.cleanup()
+        if candidate_temporary:
+            candidate_temporary.cleanup()
+
 def _parse_assignments(values: list[str] | None) -> dict[str, object]:
     result: dict[str, object] = {}
     for item in values or []:
@@ -222,6 +273,16 @@ def build_parser() -> argparse.ArgumentParser:
         "graph-summary", help="Assemble or inspect a semantic graph summary"
     )
     graph_parser.add_argument("path", type=Path)
+
+    invariant_parser = subparsers.add_parser("invariants", help="Evaluate generic invariants for a case bundle")
+    invariant_parser.add_argument("path", type=Path)
+
+    analyze_parser = subparsers.add_parser("analyze", help="Run invariant and bounded analyzer packs")
+    analyze_parser.add_argument("path", type=Path)
+
+    compare_parser = subparsers.add_parser("compare", help="Semantically align and compare two case bundles")
+    compare_parser.add_argument("baseline", type=Path)
+    compare_parser.add_argument("candidate", type=Path)
     return parser
 
 
@@ -241,6 +302,12 @@ def main(argv: list[str] | None = None) -> int:
         return command_scenario_generate(args)
     if args.command == "graph-summary":
         return command_graph_summary(args.path)
+    if args.command == "invariants":
+        return command_invariants(args.path)
+    if args.command == "analyze":
+        return command_analyze(args.path)
+    if args.command == "compare":
+        return command_compare(args.baseline, args.candidate)
     raise AssertionError(f"unknown command: {args.command}")
 
 

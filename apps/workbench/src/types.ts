@@ -10,6 +10,8 @@ export interface CaseSummary {
   relation_count: number;
   effect_count: number;
   warning_count: number;
+  finding_count: number;
+  violated_invariant_count: number;
   scenario_family?: string;
 }
 
@@ -207,4 +209,118 @@ export interface GeneratedScenario {
   };
   graph: AssembledGraph;
   timeline: TimelineModel;
+}
+
+export interface InvariantResult {
+  result_id: string;
+  invariant_ref: string;
+  scope_kind: string;
+  scope_ref: string;
+  status: string;
+  severity: string;
+  evidence_classification: string;
+  evidence_refs: string[];
+  node_refs: string[];
+  relation_refs: string[];
+  context_refs: string[];
+  effect_refs: string[];
+  counterexample_refs: string[];
+  missing_evidence: string[];
+  confidence: { score: number; rationale?: string };
+  explanation: string;
+  attributes: Record<string, unknown>;
+}
+
+export interface InvariantReport {
+  report_id: string;
+  case_id: string;
+  graph_id: string;
+  results: InvariantResult[];
+  summary: Record<string, number>;
+}
+
+export interface Finding {
+  finding_id: string;
+  analyzer_ref: string;
+  category: string;
+  classification: string;
+  title: string;
+  summary: string;
+  severity: string;
+  evidence_classification: string;
+  confidence: { score: number; rationale?: string };
+  related_invariant_result_refs: string[];
+  evidence_refs: string[];
+  node_refs: string[];
+  relation_refs: string[];
+  context_refs: string[];
+  effect_refs: string[];
+  conflicting_evidence_refs: string[];
+  limitations: string[];
+  recommended_inspection_points: string[];
+  attributes: Record<string, unknown>;
+}
+
+export interface AnalysisReport {
+  report_id: string;
+  case_id: string;
+  graph_id: string;
+  invariant_report: InvariantReport;
+  findings: Finding[];
+  summary: Record<string, number>;
+  limitations: string[];
+}
+
+export interface NodeAlignment {
+  alignment_id: string;
+  baseline_node_ref?: string;
+  candidate_node_ref?: string;
+  status: string;
+  score: number;
+  confidence: { score: number; rationale?: string };
+  reasons: string[];
+  baseline_signature?: { node_ref: string; node_kind: string; normalized_operation: string; component_kind: string; topology_role?: string; stage?: number };
+  candidate_signature?: { node_ref: string; node_kind: string; normalized_operation: string; component_kind: string; topology_role?: string; stage?: number };
+  ambiguous_candidate_refs: string[];
+}
+
+export interface Divergence {
+  divergence_id: string;
+  dimension: string;
+  classification: string;
+  title: string;
+  summary: string;
+  severity: string;
+  consequence: string;
+  evidence_classification: string;
+  confidence: { score: number; rationale?: string };
+  alignment_ref?: string;
+  baseline_refs: string[];
+  candidate_refs: string[];
+  baseline_evidence_refs: string[];
+  candidate_evidence_refs: string[];
+  temporal_rank_ms?: number;
+  consequential: boolean;
+  limitations: string[];
+  attributes: Record<string, unknown>;
+}
+
+export interface SemanticComparison {
+  comparison_id: string;
+  baseline: { role: string; case_id: string; graph_id: string };
+  candidate: { role: string; case_id: string; graph_id: string };
+  alignments: NodeAlignment[];
+  divergences: Divergence[];
+  first_meaningful_divergence_ref?: string;
+  summary: {
+    aligned_nodes: number;
+    baseline_only_nodes: number;
+    candidate_only_nodes: number;
+    ambiguous_alignments: number;
+    divergence_count: number;
+    consequential_divergence_count: number;
+    by_dimension: Record<string, number>;
+    first_meaningful_divergence_ref?: string;
+  };
+  limitations: string[];
 }

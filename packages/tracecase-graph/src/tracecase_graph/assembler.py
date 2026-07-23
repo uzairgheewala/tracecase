@@ -37,7 +37,7 @@ from .models import (
 class GraphAssembler:
     """Deterministically assembles execution semantics without mutating source evidence."""
 
-    VERSION = "0.2.0"
+    VERSION = "0.3.0"
 
     def assemble(self, execution: ExecutionModel) -> AssembledExecutionGraph:
         nodes = tuple(sorted(execution.nodes, key=_node_sort_key))

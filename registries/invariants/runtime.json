@@ -1,0 +1,388 @@
+[
+  {
+    "description": "Required context remains present and semantically equivalent across its declared propagation path.",
+    "evaluator_kind": "context.required_continuity",
+    "extensions": {},
+    "insufficient_evidence_policy": "inconclusive",
+    "invariant_class": "continuity",
+    "invariant_id": "invariant.context.required-continuity.v1",
+    "parameters": {},
+    "required_evidence": [
+      {
+        "description": null,
+        "kind": "nodes",
+        "minimum_count": 1
+      },
+      {
+        "description": null,
+        "kind": "contexts",
+        "minimum_count": 1
+      }
+    ],
+    "scope": {
+      "attributes": {},
+      "component_kinds": [],
+      "kind": "context_path",
+      "node_kinds": [],
+      "operation_pattern": null
+    },
+    "severity": "high",
+    "tags": [
+      "continuity"
+    ],
+    "title": "Required context continuity",
+    "version": "1.0.0"
+  },
+  {
+    "description": "Context marked forbidden does not cross beyond its origin scope.",
+    "evaluator_kind": "context.forbidden_propagation",
+    "extensions": {},
+    "insufficient_evidence_policy": "inconclusive",
+    "invariant_class": "privacy",
+    "invariant_id": "invariant.context.forbidden-propagation.v1",
+    "parameters": {},
+    "required_evidence": [
+      {
+        "description": null,
+        "kind": "contexts",
+        "minimum_count": 1
+      }
+    ],
+    "scope": {
+      "attributes": {},
+      "component_kinds": [],
+      "kind": "context_path",
+      "node_kinds": [],
+      "operation_pattern": null
+    },
+    "severity": "high",
+    "tags": [
+      "privacy"
+    ],
+    "title": "Forbidden context propagation",
+    "version": "1.0.0"
+  },
+  {
+    "description": "Independent tenant and workflow executions remain distinguishable.",
+    "evaluator_kind": "identity.execution_isolation",
+    "extensions": {},
+    "insufficient_evidence_policy": "inconclusive",
+    "invariant_class": "isolation",
+    "invariant_id": "invariant.identity.execution-isolation.v1",
+    "parameters": {},
+    "required_evidence": [
+      {
+        "description": null,
+        "kind": "nodes",
+        "minimum_count": 1
+      }
+    ],
+    "scope": {
+      "attributes": {},
+      "component_kinds": [],
+      "kind": "identity_group",
+      "node_kinds": [],
+      "operation_pattern": null
+    },
+    "severity": "high",
+    "tags": [
+      "isolation"
+    ],
+    "title": "Execution identity isolation",
+    "version": "1.0.0"
+  },
+  {
+    "description": "A logical workflow remains correlatable across all participating execution boundaries.",
+    "evaluator_kind": "identity.workflow_correlatable",
+    "extensions": {},
+    "insufficient_evidence_policy": "inconclusive",
+    "invariant_class": "observability",
+    "invariant_id": "invariant.identity.workflow-correlatable.v1",
+    "parameters": {},
+    "required_evidence": [
+      {
+        "description": null,
+        "kind": "nodes",
+        "minimum_count": 1
+      }
+    ],
+    "scope": {
+      "attributes": {},
+      "component_kinds": [],
+      "kind": "identity_group",
+      "node_kinds": [],
+      "operation_pattern": null
+    },
+    "severity": "high",
+    "tags": [
+      "observability"
+    ],
+    "title": "Workflow correlatability",
+    "version": "1.0.0"
+  },
+  {
+    "description": "A logical effect becomes durable no more than its declared maximum count.",
+    "evaluator_kind": "effect.at_most_once",
+    "extensions": {},
+    "insufficient_evidence_policy": "inconclusive",
+    "invariant_class": "safety",
+    "invariant_id": "invariant.effect.at-most-once.v1",
+    "parameters": {
+      "default_maximum": 1
+    },
+    "required_evidence": [
+      {
+        "description": null,
+        "kind": "effects",
+        "minimum_count": 1
+      }
+    ],
+    "scope": {
+      "attributes": {},
+      "component_kinds": [],
+      "kind": "effect_group",
+      "node_kinds": [],
+      "operation_pattern": null
+    },
+    "severity": "high",
+    "tags": [
+      "safety"
+    ],
+    "title": "At-most-once durable effect",
+    "version": "1.0.0"
+  },
+  {
+    "description": "Every declared required logical effect is eventually present in the execution evidence.",
+    "evaluator_kind": "effect.required_eventuality",
+    "extensions": {},
+    "insufficient_evidence_policy": "inconclusive",
+    "invariant_class": "liveness",
+    "invariant_id": "invariant.effect.required-eventuality.v1",
+    "parameters": {},
+    "required_evidence": [
+      {
+        "description": null,
+        "kind": "nodes",
+        "minimum_count": 1
+      }
+    ],
+    "scope": {
+      "attributes": {},
+      "component_kinds": [],
+      "kind": "effect_group",
+      "node_kinds": [],
+      "operation_pattern": null
+    },
+    "severity": "high",
+    "tags": [
+      "liveness"
+    ],
+    "title": "Required effect eventuality",
+    "version": "1.0.0"
+  },
+  {
+    "description": "A dependent read begins only after the producing transaction or write becomes visible.",
+    "evaluator_kind": "ordering.read_after_visibility",
+    "extensions": {},
+    "insufficient_evidence_policy": "inconclusive",
+    "invariant_class": "ordering",
+    "invariant_id": "invariant.ordering.read-after-visibility.v1",
+    "parameters": {},
+    "required_evidence": [
+      {
+        "description": null,
+        "kind": "nodes",
+        "minimum_count": 1
+      }
+    ],
+    "scope": {
+      "attributes": {},
+      "component_kinds": [],
+      "kind": "relation",
+      "node_kinds": [],
+      "operation_pattern": null
+    },
+    "severity": "high",
+    "tags": [
+      "ordering"
+    ],
+    "title": "Read after visibility",
+    "version": "1.0.0"
+  },
+  {
+    "description": "State observations meet their declared freshness and cache validity requirements.",
+    "evaluator_kind": "consistency.required_freshness",
+    "extensions": {},
+    "insufficient_evidence_policy": "inconclusive",
+    "invariant_class": "safety",
+    "invariant_id": "invariant.consistency.required-freshness.v1",
+    "parameters": {},
+    "required_evidence": [
+      {
+        "description": null,
+        "kind": "nodes",
+        "minimum_count": 1
+      }
+    ],
+    "scope": {
+      "attributes": {},
+      "component_kinds": [],
+      "kind": "case",
+      "node_kinds": [],
+      "operation_pattern": null
+    },
+    "severity": "high",
+    "tags": [
+      "safety"
+    ],
+    "title": "Required freshness",
+    "version": "1.0.0"
+  },
+  {
+    "description": "Collaborating producer and consumer schema versions are compatible.",
+    "evaluator_kind": "contract.schema_compatible",
+    "extensions": {},
+    "insufficient_evidence_policy": "inconclusive",
+    "invariant_class": "compatibility",
+    "invariant_id": "invariant.contract.schema-compatible.v1",
+    "parameters": {},
+    "required_evidence": [
+      {
+        "description": null,
+        "kind": "nodes",
+        "minimum_count": 1
+      }
+    ],
+    "scope": {
+      "attributes": {},
+      "component_kinds": [],
+      "kind": "case",
+      "node_kinds": [],
+      "operation_pattern": null
+    },
+    "severity": "high",
+    "tags": [
+      "compatibility"
+    ],
+    "title": "Schema compatibility",
+    "version": "1.0.0"
+  },
+  {
+    "description": "The execution does not exceed a declared resource capacity bound.",
+    "evaluator_kind": "resource.capacity_bounded",
+    "extensions": {},
+    "insufficient_evidence_policy": "inconclusive",
+    "invariant_class": "resource",
+    "invariant_id": "invariant.resource.capacity-bounded.v1",
+    "parameters": {},
+    "required_evidence": [
+      {
+        "description": null,
+        "kind": "nodes",
+        "minimum_count": 1
+      }
+    ],
+    "scope": {
+      "attributes": {},
+      "component_kinds": [],
+      "kind": "case",
+      "node_kinds": [],
+      "operation_pattern": null
+    },
+    "severity": "high",
+    "tags": [
+      "resource"
+    ],
+    "title": "Resource capacity bound",
+    "version": "1.0.0"
+  },
+  {
+    "description": "Semantically equivalent work remains within the configured amplification limit.",
+    "evaluator_kind": "performance.work_amplification",
+    "extensions": {},
+    "insufficient_evidence_policy": "inconclusive",
+    "invariant_class": "resource",
+    "invariant_id": "invariant.performance.work-amplification.v1",
+    "parameters": {
+      "default_maximum": 1
+    },
+    "required_evidence": [
+      {
+        "description": null,
+        "kind": "nodes",
+        "minimum_count": 1
+      }
+    ],
+    "scope": {
+      "attributes": {},
+      "component_kinds": [],
+      "kind": "case",
+      "node_kinds": [],
+      "operation_pattern": null
+    },
+    "severity": "high",
+    "tags": [
+      "resource"
+    ],
+    "title": "Work amplification bound",
+    "version": "1.0.0"
+  },
+  {
+    "description": "Expected causal boundaries retain source-backed execution linkage.",
+    "evaluator_kind": "observability.required_linkage",
+    "extensions": {},
+    "insufficient_evidence_policy": "inconclusive",
+    "invariant_class": "observability",
+    "invariant_id": "invariant.observability.required-linkage.v1",
+    "parameters": {},
+    "required_evidence": [
+      {
+        "description": null,
+        "kind": "nodes",
+        "minimum_count": 1
+      }
+    ],
+    "scope": {
+      "attributes": {},
+      "component_kinds": [],
+      "kind": "relation",
+      "node_kinds": [],
+      "operation_pattern": null
+    },
+    "severity": "high",
+    "tags": [
+      "observability"
+    ],
+    "title": "Required causal linkage",
+    "version": "1.0.0"
+  },
+  {
+    "description": "Credentials and explicitly prohibited sensitive values are absent from collected evidence.",
+    "evaluator_kind": "privacy.prohibited_capture",
+    "extensions": {},
+    "insufficient_evidence_policy": "inconclusive",
+    "invariant_class": "privacy",
+    "invariant_id": "invariant.privacy.prohibited-capture.v1",
+    "parameters": {},
+    "required_evidence": [
+      {
+        "description": null,
+        "kind": "observations",
+        "minimum_count": 1
+      }
+    ],
+    "scope": {
+      "attributes": {},
+      "component_kinds": [],
+      "kind": "case",
+      "node_kinds": [],
+      "operation_pattern": null
+    },
+    "severity": "critical",
+    "tags": [
+      "privacy"
+    ],
+    "title": "Prohibited sensitive capture",
+    "version": "1.0.0"
+  }
+]

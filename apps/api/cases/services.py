@@ -5,7 +5,9 @@ from pathlib import Path
 
 from django.conf import settings
 from tracecase_bundle import BundleReader
+from tracecase_analyzers import AnalysisReport, AnalyzerEngine
 from tracecase_graph import AssembledExecutionGraph, GraphAssembler, TimelineModel
+from tracecase_invariants import InvariantEvaluationReport, InvariantRuntime
 
 
 @dataclass(frozen=True)
@@ -21,6 +23,8 @@ class CaseSummary:
     relation_count: int
     effect_count: int
     warning_count: int
+    finding_count: int
+    violated_invariant_count: int
     scenario_family: str | None
 
 
@@ -65,6 +69,21 @@ class CaseRepository:
         graph = self.get_assembled_graph(case_id)
         return GraphAssembler().timeline(graph, case.system)
 
+
+    def get_invariant_report(self, case_id: str) -> InvariantEvaluationReport:
+        reader = self.get_reader(case_id)
+        if reader.has_artifact("analysis/invariant_results.json"):
+            return InvariantEvaluationReport.model_validate(reader.read_json("analysis/invariant_results.json"))
+        case = reader.load_case()
+        return InvariantRuntime().evaluate(case, self.get_assembled_graph(case_id))
+
+    def get_analysis_report(self, case_id: str) -> AnalysisReport:
+        reader = self.get_reader(case_id)
+        if reader.has_artifact("analysis/analysis_report.json"):
+            return AnalysisReport.model_validate(reader.read_json("analysis/analysis_report.json"))
+        case = reader.load_case()
+        return AnalyzerEngine().analyze(case, self.get_assembled_graph(case_id))
+
     def _summarize(self, path: Path) -> CaseSummary:
         reader = BundleReader(path)
         case = reader.load_case()
@@ -73,6 +92,7 @@ class CaseRepository:
             if reader.has_artifact("analysis/assembled_graph.json")
             else GraphAssembler().assemble(case.evidence.execution)
         )
+        analysis = self.get_analysis_report(reader.manifest.case_id)
         return CaseSummary(
             case_id=reader.manifest.case_id,
             bundle_id=reader.manifest.bundle_id,
@@ -85,5 +105,10 @@ class CaseRepository:
             relation_count=len(graph.relations),
             effect_count=len(case.evidence.execution.effects),
             warning_count=len(graph.report.warnings),
+            finding_count=len(analysis.findings),
+            violated_invariant_count=sum(
+                item.status.value in {"violated", "contradicted"}
+                for item in analysis.invariant_report.results
+            ),
             scenario_family=(reader.manifest.scenario.family_ref if reader.manifest.scenario else None),
         )

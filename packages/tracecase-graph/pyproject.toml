@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tracecase-graph"
-version = "0.2.0"
+version = "0.3.0"
 description = "Deterministic execution graph assembly and timeline modeling for Tracecase"
 requires-python = ">=3.11"
 dependencies = [
   "pydantic>=2.8,<3",
-  "tracecase-model>=0.1.0",
+  "tracecase-model>=0.3.0",
 ]
 
 [tool.setuptools.packages.find]

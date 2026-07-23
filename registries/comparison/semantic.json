@@ -1,0 +1,31 @@
+{
+  "alignment_basis": [
+    "topology role and ordinal attempt",
+    "normalized operation",
+    "node kind",
+    "component kind and role",
+    "logical operation identity",
+    "task name",
+    "topology stage"
+  ],
+  "dimensions": [
+    "structure",
+    "identity",
+    "context",
+    "timing",
+    "state",
+    "effect",
+    "error",
+    "resource",
+    "deployment",
+    "evidence"
+  ],
+  "engine": "tracecase.semantic-comparison.v1",
+  "ignored_noise": [
+    "regenerated trace identifiers",
+    "regenerated workflow identifiers",
+    "harmless timestamp jitter",
+    "reordered concurrent observations"
+  ],
+  "version": "0.3.0"
+}

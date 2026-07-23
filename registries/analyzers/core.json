@@ -1,0 +1,99 @@
+[
+  {
+    "analyzer_id": "analyzer.context-continuity.v1",
+    "category": "context",
+    "description": "Interprets required, forbidden, mutated, and contaminated context paths.",
+    "deterministic": true,
+    "extensions": {},
+    "invariant_refs": [
+      "invariant.context.required-continuity.v1",
+      "invariant.context.forbidden-propagation.v1"
+    ],
+    "parameters": {},
+    "title": "Context continuity analyzer",
+    "version": "0.3.0"
+  },
+  {
+    "analyzer_id": "analyzer.identity-integrity.v1",
+    "category": "identity",
+    "description": "Detects execution collapse, fragmentation, and workflow correlation failures.",
+    "deterministic": true,
+    "extensions": {},
+    "invariant_refs": [
+      "invariant.identity.execution-isolation.v1",
+      "invariant.identity.workflow-correlatable.v1"
+    ],
+    "parameters": {},
+    "title": "Identity integrity analyzer",
+    "version": "0.3.0"
+  },
+  {
+    "analyzer_id": "analyzer.retry-effect.v1",
+    "category": "retry_effect",
+    "description": "Detects duplicate, omitted, ambiguous, and repeated durable logical effects.",
+    "deterministic": true,
+    "extensions": {},
+    "invariant_refs": [
+      "invariant.effect.at-most-once.v1",
+      "invariant.effect.required-eventuality.v1"
+    ],
+    "parameters": {},
+    "title": "Retry and effect analyzer",
+    "version": "0.3.0"
+  },
+  {
+    "analyzer_id": "analyzer.transaction-ordering.v1",
+    "category": "transaction_ordering",
+    "description": "Detects read-before-visibility and causally contradictory transaction timing.",
+    "deterministic": true,
+    "extensions": {},
+    "invariant_refs": [
+      "invariant.ordering.read-after-visibility.v1"
+    ],
+    "parameters": {},
+    "title": "Transaction ordering analyzer",
+    "version": "0.3.0"
+  },
+  {
+    "analyzer_id": "analyzer.observability-integrity.v1",
+    "category": "observability",
+    "description": "Detects missing source-backed links, disconnected fragments, contradictions, and timestamp conflicts.",
+    "deterministic": true,
+    "extensions": {},
+    "invariant_refs": [
+      "invariant.observability.required-linkage.v1"
+    ],
+    "parameters": {},
+    "title": "Observability integrity analyzer",
+    "version": "0.3.0"
+  },
+  {
+    "analyzer_id": "analyzer.resource-amplification.v1",
+    "category": "resource_performance",
+    "description": "Detects resource exhaustion and prohibited semantic work amplification.",
+    "deterministic": true,
+    "extensions": {},
+    "invariant_refs": [
+      "invariant.resource.capacity-bounded.v1",
+      "invariant.performance.work-amplification.v1",
+      "invariant.consistency.required-freshness.v1"
+    ],
+    "parameters": {},
+    "title": "Resource and amplification analyzer",
+    "version": "0.3.0"
+  },
+  {
+    "analyzer_id": "analyzer.contract-privacy.v1",
+    "category": "contract",
+    "description": "Detects schema incompatibility and prohibited sensitive evidence capture.",
+    "deterministic": true,
+    "extensions": {},
+    "invariant_refs": [
+      "invariant.contract.schema-compatible.v1",
+      "invariant.privacy.prohibited-capture.v1"
+    ],
+    "parameters": {},
+    "title": "Contract and privacy analyzer",
+    "version": "0.3.0"
+  }
+]

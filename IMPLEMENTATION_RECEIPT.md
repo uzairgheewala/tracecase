@@ -1,154 +1,141 @@
-# Milestone B implementation receipt
+# Milestone C implementation receipt
 
-## Delivery form
+## Delivery contract
 
-This milestone is delivered as a **delta over Milestone A**. The ZIP contains only new or modified repository files in their original repo-relative paths. Applying it consists of extracting the archive over the Milestone A repository root.
+This milestone is delivered as a repository-relative delta over the validated Milestone B repository. The archive contains only added or modified files in their original paths. `DELTA_MANIFEST.json` records additions, modifications, deletions, sizes, and SHA-256 hashes.
 
-No Milestone A source file is removed by this delta.
+## Roadmap scope
 
-## Implemented scope
+Milestone C implements Phases 9–11:
 
-Milestone B implements Phases 4–8 of the roadmap.
+1. Generic invariant engine.
+2. Bounded evidence-linked analyzer family pack.
+3. Semantic execution comparison and synchronized comparison UI.
 
-### Phase 4 — Scenario universe and registry
+## Added packages
 
-- Added the `tracecase-scenarios` package.
-- Defined versioned semantic universes spanning topology, propagation, state/effects, time/concurrency, failure/recovery, contract evolution, resources/performance, isolation/privacy, deployment/configuration and observability/evidence.
-- Added typed topology motifs, roles, edges, context contracts, effect templates and resource templates.
-- Added parameter domains, admissibility constraints, expected-invariant records, minimization hints and coverage dimensions.
-- Added 14 initial generic scenario families and 17 reusable fault operators.
-- Exported portable JSON registry snapshots under `registries/`.
-- Kept all families framework- and domain-neutral.
+### `tracecase-invariants`
 
-### Phase 5 — Scenario composition and generation
+Provides versioned invariant contracts, evidence requirements, scope selectors, evaluator kinds, a deterministic runtime, minimal counterexamples, evaluation traces, and six-state outcomes.
 
-- Added `ScenarioDefinition`, `ScenarioInstance`, `FaultApplication` and observability-profile contracts.
-- Implemented deterministic instance resolution from a definition and seed.
-- Added typed parameter coercion and domain validation.
-- Added admissibility validation with stable diagnostics.
-- Added deterministic instance digests and coverage points.
-- Added exact, sampled, constrained exhaustive and pairwise covering-set generation.
-- Added CLI scenario listing and deterministic generation commands.
-- Added a reusable repository delta builder for all subsequent milestone deliveries.
-- Added Django scenario-family and scenario-generation endpoints.
-- Added a functional scenario-construction surface to the React Workbench.
+The default registry contains 13 framework-neutral invariants spanning continuity, isolation, liveness, ordering, consistency, compatibility, resources, observability, and privacy.
 
-### Phase 6 — Synthetic execution and evidence engine
+### `tracecase-analyzers`
 
-- Implemented a framework-neutral synthetic execution engine.
-- Materialized topology roles into canonical components, boundaries, nodes, observations, contexts, state facts and effects.
-- Separated semantic fault application from observability degradation.
-- Preserved both ground-truth and observed cases in reproducible synthetic bundles.
-- Added exact synthetic oracle outcomes and coverage metadata.
-- Implemented semantic operators for context loss/mutation, duplicate/omitted effects, timing/order changes, schema skew, capacity exhaustion and execution amplification.
-- Implemented observability operators for broken trace linkage, dropped evidence, clock skew, contradictory observations and prohibited sensitive capture.
+Provides analyzer definitions, run receipts, bounded findings, severity/category taxonomies, and a deterministic analyzer engine. Seven initial analyzer packs cover context, identity, retry/effects, transaction ordering, observability, resource amplification, and contract/privacy behavior.
 
-### Phase 7 — Collection and adapter framework
+### `tracecase-compare`
 
-- Added the `tracecase-collectors` package.
-- Defined source-adapter discovery, collection and normalization contracts.
-- Added raw-record, candidate-record, fragment, request, result and diagnostic models.
-- Added a collection coordinator with partial-failure isolation.
-- Added strict tenant-scope validation before fragment merge.
-- Added an in-memory canonical-fragment adapter.
-- Added an OpenTelemetry JSON adapter supporting resource/scope span and simplified span representations.
-- Added a structured-event adapter for request, task, SQL, HTTP and domain-event style inputs.
-- Preserved source-native IDs, raw-record digests and provenance through normalization.
+Provides topology-aware semantic signatures, constrained node alignment, ambiguity handling, divergence classification, noise suppression, temporal ranking, and first-meaningful-divergence selection.
 
-### Phase 8 — Execution-graph assembly and timeline
+## Existing package changes
 
-- Added the `tracecase-graph` package.
-- Implemented deterministic graph assembly over frozen canonical evidence.
-- Preserved all source nodes and relations unchanged.
-- Added derived parent-span, workflow, logical-operation, task/retry, message and repeated-effect relations.
-- Added identity groups across trace, workflow, run, logical-operation, task, message, idempotency and tenant dimensions.
-- Added context-flow reconstruction and continuity status.
-- Added logical-effect groups and durable-effect counts.
-- Added partial temporal constraints and contradiction-preserving graph warnings.
-- Added connected-component and disconnected-fragment reporting.
-- Added component-lane timeline projection.
-- Added CLI graph summaries and Django graph/timeline endpoints.
-- Upgraded the Workbench with an interactive SVG graph, multi-lane timeline, semantic identity/context/effect views and node-level evidence inspection.
+- `tracecase-bundle` writes producer version `0.3.0`, points completed manifests to deterministic analysis/comparison artifacts, and fixes archive opening through temporary directories.
+- `tracecase-scenarios` enriches generated execution metadata with family, topology, invariant, expected-effect, and expected-edge contracts.
+- `tracecase-cli` adds `invariants`, `analyze`, and `compare` commands.
+- API case services compute or load invariant and analysis reports and expose new endpoints.
+- A new comparison API performs baseline/candidate semantic comparison.
+- The Workbench adds invariant, finding, and comparison surfaces.
 
-## Bundle changes
+## Invariant behavior validated
 
-The bundle implementation remains independent of scenario, collector and graph packages.
+The analyzed baseline fixture produces:
 
-Milestone B adds:
+- 13 evaluated invariants;
+- 9 satisfied;
+- 4 not applicable;
+- 0 violations;
+- 0 findings.
 
-- scenario and collection descriptors in the manifest;
-- generic `SupplementalArtifact` support;
-- synthetic, collection, registry, analysis and model supplement roots;
-- optional artifact lookup and JSON loading;
-- graph, timeline, scenario, oracle and ground-truth artifacts in synthetic benchmark bundles;
-- evidence-digest coverage for synthetic and collection evidence layers.
+The context-failure fixture produces one required-continuity violation and one high-severity bounded finding with a counterexample.
 
-Every supplemental artifact remains content-indexed and checksum-covered.
+The duplicate-effect fixture produces one at-most-once violation and two high-severity findings: the generic invariant finding and the retry-specific duplicate durable-effect finding.
 
-## Generated fixtures
+The causal-gap fixture preserves the underlying semantic workflow while producing one observability-linkage violation and two evidence-focused findings.
 
-The validation process generates and verifies:
+## Semantic comparison behavior validated
 
-1. `minimal-success.tracecase` — Milestone A regression fixture.
-2. `context-continuity-baseline.tracecase` — intact required context.
-3. `context-continuity-failure.tracecase` — semantic context disappearance.
-4. `duplicate-effect-failure.tracecase` — retry lineage with two durable logical effects.
-5. `causal-gap-observed.tracecase` — intact ground truth with deliberately broken observed linkage.
+The context baseline/failure comparison produces:
 
-Each fixture is available as both a directory-form bundle and ZIP transport archive.
+- 4 aligned nodes;
+- 0 baseline-only nodes;
+- 0 candidate-only nodes;
+- 0 ambiguous alignments;
+- 1 consequential divergence.
 
-## Tests added
+The selected first meaningful divergence occurs at the consumer operation at 200 ms and identifies the missing `tenant.tenant_id` context field. Regenerated execution identities do not create false divergences.
 
-- Scenario registry and deterministic-generation tests.
-- Pairwise covering-set tests.
-- Semantic-fault versus observability-fault separation tests.
-- Synthetic oracle and case-generation tests.
-- OpenTelemetry and structured-event normalization tests.
-- Partial adapter failure and tenant-scope rejection tests.
-- Identity, retry, message, effect-group, context-flow and timeline graph tests.
-- Supplemental bundle round-trip and integrity tests.
-- All Milestone A conformance and tamper-detection tests remain active.
+Retry comparison tests additionally validate candidate-only attempts and duplicate durable-effect divergence.
 
-## Validation performed
+## Portable Milestone C fixtures
 
-The final backend validation run completed successfully:
+- `context-analysis-baseline.tracecase`
+- `context-analysis-failure.tracecase`
+- `duplicate-effect-analysis.tracecase`
+- `causal-gap-analysis.tracecase`
+- `semantic-context-comparison.tracecase`
+
+Each has an equivalent ZIP transport archive. Analyzed bundles include invariant reports, findings, analyzer run receipts, graph/timeline artifacts, and their prior scenario evidence. The comparison bundle includes case references, alignments, divergences, summary, and complete semantic comparison.
+
+## Workbench additions
+
+### Explore Cases
+
+- invariant-result list with status and confidence;
+- evidence-linked finding list;
+- finding-to-node navigation;
+- finding inspector with evidence class, limitations, and recommended inspection points;
+- bundle summary counts for findings and violated invariants.
+
+### Compare Executions
+
+- baseline and candidate case selection;
+- semantic alignment list;
+- matched, missing, and ambiguous alignment states;
+- divergence navigator;
+- first meaningful divergence callout;
+- divergence evidence and limitation inspector.
+
+## API additions
+
+- `GET /api/cases/{case_id}/invariants`
+- `GET /api/cases/{case_id}/analysis`
+- `POST /api/comparisons`
+
+The comparison request requires `baseline_case_id` and `candidate_case_id`.
+
+## Validation result
+
+The final working repository passed:
 
 ```text
 Architecture dependency checks passed.
-22 tests passed.
-5 directory bundles verified.
-Missing paths: 0.
-Digest mismatches: 0.
-Unexpected paths: 0.
-Scenario CLI smoke tests passed.
-Graph CLI smoke tests passed.
+37 tests passed.
+10 directory-form bundles verified.
+5 Milestone C ZIP bundles opened and verified.
+Invariant CLI smoke test passed.
+Analyzer CLI smoke test passed.
+Semantic comparison CLI smoke test passed.
 Python compilation passed.
-TypeScript/TSX syntax transpilation passed.
+Workbench TypeScript/TSX syntax transpilation passed for 4 source files.
 ```
 
-The four Milestone B graph fixtures also reconstruct successfully with expected identity, context, retry/effect and temporal projections.
+A full local Vite production build was not run because npm dependency installation timed out in the execution container. The source syntax passed through the TypeScript compiler API, and CI performs `npm install` plus the complete `npm run build` in a network-enabled environment.
 
-## UI validation boundary
+## Architectural guarantees
 
-The Workbench source was syntax-transpiled with TypeScript 5.8.3. A complete React/Vite dependency installation could not be completed in the execution container because npm package retrieval timed out. The repository CI workflow installs the pinned dependencies and runs the full TypeScript and Vite production build in an environment with package access.
+- Evidence, graph, invariant, finding, and comparison layers remain distinct.
+- Missing evidence can yield `inconclusive` instead of fabricated certainty.
+- Every finding cites evidence and exposes limitations.
+- Comparison does not rely on run-local trace or span IDs.
+- Generic packages do not import Django, Celery, OpenTelemetry, Pathforge, or application-specific code.
+- Comparison does not depend on a particular analyzer pack.
+- All derived artifacts are additive and integrity-covered.
 
-## Intentionally deferred to Milestone C
+## Deferred to Milestone D and later
 
-- Declarative invariant evaluation runtime.
-- Satisfied, violated, inconclusive and contradicted invariant results.
-- Bounded analyzer families and forensic findings.
-- Minimal counterexample extraction.
-- Semantic baseline/candidate alignment.
-- First meaningful divergence analysis.
-- Full privacy transformation and shareable-export policy engine.
-
-## Architectural guarantees introduced
-
-1. Scenario families are generic semantic mechanisms, not named application incidents.
-2. Scenario instances are deterministic and content-addressable.
-3. Semantic faults alter ground truth; observability faults alter only evidence.
-4. Adapters cannot silently merge evidence across tenant scope.
-5. Graph assembly is additive and does not rewrite source evidence.
-6. Every relationship remains classified by derivation type.
-7. Scenario and graph artifacts do not reverse bundle-package dependencies.
-8. All generated fixtures remain portable and independently verifiable.
+- Privacy classification, redaction, and export policy engine.
+- Real distributed reference laboratory and live fault injection.
+- Coverage observatory and scenario minimization.
+- Large-case hardening and schema migration systems.
+- Pathforge-specific extensions and analyzers.

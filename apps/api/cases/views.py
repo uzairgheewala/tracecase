@@ -21,6 +21,7 @@ def case_detail(_request, case_id: str):
     try:
         reader = repository.get_reader(case_id)
         graph = repository.get_assembled_graph(case_id)
+        analysis = repository.get_analysis_report(case_id)
     except FileNotFoundError:
         return Response({"detail": "Case not found"}, status=status.HTTP_404_NOT_FOUND)
     case = reader.load_case()
@@ -41,6 +42,12 @@ def case_detail(_request, case_id: str):
                 "effect_groups": len(graph.effect_groups),
                 "observations": len(case.evidence.execution.observations),
                 "warnings": len(graph.report.warnings),
+                "invariant_results": len(analysis.invariant_report.results),
+                "violated_invariants": sum(
+                    item.status.value in {"violated", "contradicted"}
+                    for item in analysis.invariant_report.results
+                ),
+                "findings": len(analysis.findings),
             },
             "scenario": (
                 reader.read_optional_json("specification/scenario_instance.json")
@@ -75,6 +82,7 @@ def case_graph(_request, case_id: str):
 def case_assembled_graph(_request, case_id: str):
     try:
         graph = repository.get_assembled_graph(case_id)
+        analysis = repository.get_analysis_report(case_id)
     except FileNotFoundError:
         return Response({"detail": "Case not found"}, status=status.HTTP_404_NOT_FOUND)
     return Response(graph.model_dump(mode="json"))
@@ -96,3 +104,21 @@ def case_validation(_request, case_id: str):
     except FileNotFoundError:
         return Response({"detail": "Case not found"}, status=status.HTTP_404_NOT_FOUND)
     return Response(reader.validation_report().model_dump(mode="json"))
+
+
+@api_view(["GET"])
+def case_invariants(_request, case_id: str):
+    try:
+        report = repository.get_invariant_report(case_id)
+    except FileNotFoundError:
+        return Response({"detail": "Case not found"}, status=status.HTTP_404_NOT_FOUND)
+    return Response(report.model_dump(mode="json"))
+
+
+@api_view(["GET"])
+def case_analysis(_request, case_id: str):
+    try:
+        report = repository.get_analysis_report(case_id)
+    except FileNotFoundError:
+        return Response({"detail": "Case not found"}, status=status.HTTP_404_NOT_FOUND)
+    return Response(report.model_dump(mode="json"))

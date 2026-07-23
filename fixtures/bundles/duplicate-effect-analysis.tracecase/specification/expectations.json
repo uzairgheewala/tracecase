@@ -1,0 +1,1 @@
+[{"basis":"semantic fault operator mutates ground-truth execution","expected_status":"violated","invariant_ref":"invariant.effect.at-most-once.v1"}]

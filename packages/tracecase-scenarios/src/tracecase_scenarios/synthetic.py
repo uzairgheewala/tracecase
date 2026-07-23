@@ -131,6 +131,7 @@ class SyntheticExecutionEngine:
         base_time: datetime,
         title: str | None,
     ) -> ExecutionCase:
+        family = self.registry.family(instance.family_ref)
         topology = instance.topology
         component_by_role: dict[str, str] = {}
         component_by_group: dict[str, str] = {}
@@ -395,7 +396,28 @@ class SyntheticExecutionEngine:
             extensions={
                 "tracecase.scenario": {
                     "instance_id": instance.instance_id,
+                    "family_ref": instance.family_ref,
+                    "topology_ref": topology.topology_id,
                     "ground_truth": True,
+                    "invariant_refs": list(family.invariant_refs),
+                    "expected_effects": [
+                        {
+                            "contract_ref": contract.contract_id,
+                            "logical_effect_key": contract.logical_effect_key,
+                            "required": contract.required,
+                            "maximum_durable_count": contract.maximum_durable_count,
+                        }
+                        for contract in topology.effects
+                    ],
+                    "expected_edges": [
+                        {
+                            "edge_id": edge.edge_id,
+                            "source_role_ref": edge.source_role_ref,
+                            "target_role_ref": edge.target_role_ref,
+                            "relation_kind": edge.relation_kind.value,
+                        }
+                        for edge in topology.edges
+                    ],
                 }
             },
         )

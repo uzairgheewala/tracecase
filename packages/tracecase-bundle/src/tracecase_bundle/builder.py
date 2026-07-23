@@ -82,7 +82,7 @@ class BundleBuilder:
 
     def __init__(self, output_path: Path, *, producer: ProducerDescriptor | None = None) -> None:
         self.output_path = output_path
-        self.producer = producer or ProducerDescriptor(name="tracecase", version="0.2.0")
+        self.producer = producer or ProducerDescriptor(name="tracecase", version="0.3.0")
         self._frozen = False
 
     def build(
@@ -142,7 +142,7 @@ class BundleBuilder:
             privacy=PrivacyDescriptor(classification="internal"),
             analysis=AnalysisDescriptor(
                 status=analysis_status,
-                analysis_runs_ref=("analysis/graph_assembly_report.json" if analysis_status != "not_started" else None),
+                analysis_runs_ref=("analysis/analysis_report.json" if analysis_status == "complete" else "comparison/semantic_comparison.json" if analysis_status == "comparison_complete" else "analysis/graph_assembly_report.json" if analysis_status != "not_started" else None),
             ),
             scenario=scenario,
             collection=collection or CollectionDescriptor(),
@@ -204,7 +204,7 @@ class BundleBuilder:
             {
                 "status": analysis_status,
                 "message": (
-                    "Canonical evidence and derived execution graph are available."
+                    "Canonical evidence and deterministic analysis artifacts are available."
                     if analysis_status != "not_started"
                     else "Bundle contains canonical evidence but no analyzer outputs."
                 ),
@@ -301,5 +301,5 @@ class BundleBuilder:
     @staticmethod
     def read_archive_temporarily(archive_path: Path) -> tempfile.TemporaryDirectory[str]:
         temporary = tempfile.TemporaryDirectory(prefix="tracecase-")
-        BundleBuilder.unpack(archive_path, Path(temporary.name))
+        BundleBuilder.unpack(archive_path, Path(temporary.name), overwrite=True)
         return temporary
